@@ -44,6 +44,8 @@ Route::get('/sensors/history', [SensorReadingController::class, 'history']); // 
 // Autentikasi (Sanctum, token-based — cocok untuk PWA/mobile).
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
+Route::post('/auth/social', [AuthController::class, 'social'])->middleware('throttle:auth-social');
+Route::get('/auth/providers', [AuthController::class, 'providers']); // penyedia login sosial yang aktif (untuk FE)
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);

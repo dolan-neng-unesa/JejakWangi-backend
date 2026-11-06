@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\SocialAuthException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\AdminNotificationModel;
 use App\Models\UserModel;
+use App\Services\SocialIdentityVerifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -14,9 +16,8 @@ use Illuminate\Support\Str;
 /**
  * Autentikasi berbasis token (Laravel Sanctum "personal access token"),
  * cocok untuk PWA/mobile (bukan cookie/CSRF seperti SPA-mode Sanctum).
- * Menggantikan Firebase Auth di svarga-app — lihat urutan fallback yang
- * sama seperti fitur lain (Laravel API -> Firebase -> mock) di
- * src/services/authService.js.
+ * Dipakai svarga-app (lihat src/services/authService.js): email/kata sandi
+ * serta login sosial Google & Facebook (lihat social()).
  *
  * Login tamu (tanpa akun) tetap didukung penuh di FE: endpoint di sini
  * hanya dipakai kalau pengguna memilih login/daftar untuk menyimpan
@@ -98,6 +99,86 @@ class AuthController extends Controller
         }
 
         return response()->json($this->tokenPayload($user));
+    }
+
+    /**
+     * Login/daftar lewat Google atau Facebook. FE mengirim kredensial dari SDK penyedia
+     * (Google: ID token, Facebook: access token); identitas diverifikasi ke penyedia
+     * oleh SocialIdentityVerifier, lalu akun dicari/dibuat dan token Sanctum diterbitkan
+     * — respons sama persis dengan login email.
+     *
+     * Urutan pencarian akun: (1) ID penyedia, (2) email yang SUDAH diverifikasi penyedia
+     * → ditautkan ke akun email yang ada, (3) buat akun baru. Akun baru diberi kata sandi
+     * acak yang tak diketahui siapa pun (kolom password NOT NULL), dan TIDAK pernah admin.
+     */
+    public function social(Request $request, SocialIdentityVerifier $verifier)
+    {
+        $validator = Validator::make($request->all(), [
+            'provider' => ['required', 'string', 'in:' . implode(',', SocialIdentityVerifier::PROVIDERS)],
+            'token' => ['required', 'string', 'max:4096'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Data login sosial tidak valid', 'errors' => $validator->errors()], 422);
+        }
+
+        $provider = $request->input('provider');
+
+        try {
+            $identity = $verifier->verify($provider, $request->input('token'));
+        } catch (SocialAuthException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
+
+        $column = $provider . '_id';
+        $email = Str::lower(trim((string) $identity['email']));
+        $created = false;
+
+        $user = UserModel::where($column, $identity['id'])->first();
+
+        if (!$user) {
+            $user = UserModel::whereRaw('LOWER(email) = ?', [$email])->first();
+
+            if ($user) {
+                if (!$user->is_active) {
+                    return response()->json(['message' => 'Akun ini dinonaktifkan. Hubungi administrator.'], 403);
+                }
+                if ($user->{$column} !== null && $user->{$column} !== $identity['id']) {
+                    return response()->json(['message' => 'Email ini sudah tertaut ke akun ' . ucfirst($provider) . ' lain.'], 409);
+                }
+                // Tautkan akun email yang sudah ada ke penyedia ini (email sudah diverifikasi penyedia).
+                $user->forceFill([$column => $identity['id'], 'email_verified_at' => $user->email_verified_at ?? now()])->save();
+            } else {
+                $user = UserModel::create([
+                    'name' => trim($identity['name']) !== '' ? trim($identity['name']) : strstr($email, '@', true),
+                    'email' => $email,
+                    'password' => Str::random(48), // cast 'hashed'; tak pernah dipakai untuk login
+                ]);
+                $user->forceFill([$column => $identity['id'], 'email_verified_at' => now()])->save();
+                $user->refresh(); // muat default DB (is_active=true) — model hasil create() belum memilikinya
+                $created = true;
+
+                AdminNotificationModel::notify('pengguna', 'Pendaftaran Pengguna Baru', "{$user->name} ({$user->email}) mendaftar lewat " . ucfirst($provider) . '.');
+            }
+        }
+
+        if (!$user->is_active) {
+            return response()->json(['message' => 'Akun ini dinonaktifkan. Hubungi administrator.'], 403);
+        }
+
+        return response()->json($this->tokenPayload($user), $created ? 201 : 200);
+    }
+
+    /**
+     * Penyedia login sosial yang aktif + ID publik aplikasinya, supaya FE tidak perlu
+     * menyalin konfigurasi (satu sumber: .env backend). Rahasia (app_secret) TIDAK pernah dikirim.
+     */
+    public function providers(SocialIdentityVerifier $verifier)
+    {
+        return response()->json([
+            'google' => $verifier->isConfigured('google') ? ['client_id' => config('services.google.client_id')] : null,
+            'facebook' => $verifier->isConfigured('facebook') ? ['app_id' => config('services.facebook.app_id'), 'version' => config('services.facebook.graph_version')] : null,
+        ]);
     }
 
     public function logout(Request $request)
