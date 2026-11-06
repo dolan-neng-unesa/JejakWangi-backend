@@ -2,18 +2,22 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+// Pengganti ExampleTest bawaan skeleton Laravel, yang meminta `/` (route web) padahal
+// aplikasi ini hanya API (bootstrap/app.php tidak memuat routes/web.php) sehingga selalu gagal.
+// Health check `/up` dipakai load balancer/monitoring; `/api/*` yang tak dikenal harus 404 JSON.
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_health_check_merespons_ok(): void
     {
-        $response = $this->get('/');
+        $this->get('/up')->assertStatus(200);
+    }
 
-        $response->assertStatus(200);
+    public function test_endpoint_api_tak_dikenal_membalas_404_json(): void
+    {
+        $this->getJson('/api/tidak-ada')
+            ->assertStatus(404)
+            ->assertJsonPath('message', 'Data tidak ditemukan.');
     }
 }

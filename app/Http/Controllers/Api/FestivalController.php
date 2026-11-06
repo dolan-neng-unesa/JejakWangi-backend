@@ -13,6 +13,14 @@ class FestivalController extends Controller
 {
     public function index(Request $request)
     {
+        $validator = Validator::make($request->query(), [
+            'month' => ['nullable', 'date_format:Y-m'],
+            'category' => ['nullable', 'in:budaya,pariwisata,seni'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Parameter tidak valid', 'errors' => $validator->errors()], 422);
+        }
+
         // ?all=1 (dipakai dashboard admin) menampilkan juga event nonaktif.
         $query = $request->boolean('all') ? FestivalModel::query() : FestivalModel::query()->active();
 
@@ -28,8 +36,7 @@ class FestivalController extends Controller
             $query->category($request->query('category'));
         }
 
-        $perPage = (int) $request->query('per_page', 10);
-        $festivals = $query->orderBy('event_date')->paginate($perPage);
+        $festivals = $query->orderBy('event_date')->orderBy('id')->paginate($this->perPage($request));
 
         return response()->json([
             'data' => FestivalResource::collection($festivals->items()),

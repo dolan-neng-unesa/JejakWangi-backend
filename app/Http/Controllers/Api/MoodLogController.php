@@ -21,7 +21,7 @@ class MoodLogController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'green_space_id' => ['required', 'integer'],
+            'green_space_id' => ['required', 'integer', 'min:1'],
             'mood_score' => ['required', 'integer', 'min:1', 'max:5'],
             'activity' => ['nullable', 'string', 'max:50'],
             'note' => ['nullable', 'string', 'max:1000'],
@@ -52,7 +52,7 @@ class MoodLogController extends Controller
         $validator = Validator::make($request->all(), [
             // Nullable: dashboard admin butuh agregat se-kota (semua green space),
             // sedangkan MoodHistoryPage.jsx di svarga-app mengirim satu green_space_id.
-            'green_space_id' => ['nullable', 'integer'],
+            'green_space_id' => ['nullable', 'integer', 'min:1'],
             'days' => ['nullable', 'integer', 'min:1', 'max:90'],
         ]);
 
@@ -64,50 +64,67 @@ class MoodLogController extends Controller
         $days = (int) ($request->query('days') ?? 7);
         $since = Carbon::now()->subDays($days - 1)->startOfDay();
 
-        $logs = MoodLogModel::query()
+        $base = fn () => MoodLogModel::query()
             ->when($greenSpaceId, fn ($q) => $q->where('green_space_id', $greenSpaceId))
-            ->where('logged_at', '>=', $since)
-            ->get(['mood_score', 'logged_at', 'user_id', 'anonymous_session_id']);
+            ->where('logged_at', '>=', $since);
+
+        // Semua agregasi dikerjakan di database (GROUP BY). Versi lama memuat SELURUH log
+        // 1–90 hari ke memori PHP lalu menghitung ulang di loop — memori & waktunya
+        // tumbuh linear dengan jumlah catatan, padahal endpoint ini publik.
+        $perDayScore = $base()
+            ->selectRaw('DATE(logged_at) as day, mood_score, COUNT(*) as n')
+            ->groupBy('day', 'mood_score')
+            ->get();
 
         // Tren harian: rata-rata skor per tanggal, mengisi hari tanpa data dengan null
         // supaya grafik FE tetap punya sumbu-x yang lengkap (bukan bolong). Distribusi
         // per hari (per_score) disertakan juga supaya dashboard admin bisa menggambar
         // grafik tren multi-garis (Sangat Baik/Baik/Biasa Saja/Buruk) per tanggal,
         // bukan cuma satu garis rata-rata.
-        $byDate = $logs->groupBy(fn ($log) => $log->logged_at->toDateString());
+        $byDate = $perDayScore->groupBy('day');
 
+        $distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
         $daily = [];
         for ($i = 0; $i < $days; $i++) {
             $date = $since->copy()->addDays($i)->toDateString();
-            $dayLogs = $byDate->get($date, collect());
             $perScore = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-            foreach ($dayLogs as $log) {
-                $perScore[$log->mood_score] = ($perScore[$log->mood_score] ?? 0) + 1;
+            $count = 0;
+            $sum = 0;
+            foreach ($byDate->get($date, []) as $row) {
+                $score = (int) $row->mood_score;
+                $n = (int) $row->n;
+                $perScore[$score] = ($perScore[$score] ?? 0) + $n;
+                $distribution[$score] = ($distribution[$score] ?? 0) + $n;
+                $count += $n;
+                $sum += $score * $n;
             }
             $daily[] = [
                 'date' => $date,
-                'average_score' => $dayLogs->isEmpty() ? null : round($dayLogs->avg('mood_score'), 2),
-                'count' => $dayLogs->count(),
+                'average_score' => $count === 0 ? null : round($sum / $count, 2),
+                'count' => $count,
                 'per_score' => $perScore,
             ];
         }
 
-        $distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-        foreach ($logs as $log) {
-            $distribution[$log->mood_score] = ($distribution[$log->mood_score] ?? 0) + 1;
-        }
-
         // Kontributor unik: akun login + sesi tamu. Catatan tanpa identitas apa pun
         // (tidak bisa di-dedupe) dihitung sebagai satu kontributor masing-masing.
-        $identified = $logs->map(fn ($l) => $l->user_id ? 'u' . $l->user_id : ($l->anonymous_session_id ? 's' . $l->anonymous_session_id : null));
-        $uniqueContributors = $identified->filter()->unique()->count() + $identified->filter(fn ($v) => $v === null)->count();
+        // Sesi tamu hanya dihitung untuk baris tanpa user_id (akun login menang).
+        $totals = $base()->selectRaw(
+            "COUNT(*) as total,
+             AVG(mood_score) as avg_score,
+             COUNT(DISTINCT user_id) as users,
+             COUNT(DISTINCT CASE WHEN user_id IS NULL AND anonymous_session_id <> '' THEN anonymous_session_id END) as sessions,
+             SUM(CASE WHEN user_id IS NULL AND (anonymous_session_id IS NULL OR anonymous_session_id = '') THEN 1 ELSE 0 END) as unidentified"
+        )->first();
+
+        $total = (int) ($totals->total ?? 0);
 
         return response()->json([
             'green_space_id' => $greenSpaceId,
-            'unique_contributors' => $uniqueContributors,
+            'unique_contributors' => (int) $totals->users + (int) $totals->sessions + (int) $totals->unidentified,
             'days' => $days,
-            'total_entries' => $logs->count(),
-            'average_score' => $logs->isEmpty() ? null : round($logs->avg('mood_score'), 2),
+            'total_entries' => $total,
+            'average_score' => $total === 0 ? null : round((float) $totals->avg_score, 2),
             'daily' => $daily,
             'distribution' => $distribution,
         ]);

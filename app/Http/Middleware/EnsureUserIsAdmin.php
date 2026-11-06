@@ -10,11 +10,16 @@ use Symfony\Component\HttpFoundation\Response;
 // dashboard admin (svarga-admin) — mis. daftar pengguna, notifikasi
 // sistem, buat zona geofencing. Endpoint baca yang aman dilihat publik
 // (sensor, koridor, festival, dst.) TIDAK memakai middleware ini.
+//
+// Admin yang dinonaktifkan (is_active=false) juga ditolak: tanpa cek ini,
+// token yang masih tersisa tetap bisa dipakai mengelola dashboard.
 class EnsureUserIsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user('sanctum')?->is_admin) {
+        $user = $request->user('sanctum');
+
+        if (!$user?->is_admin || !$user->is_active) {
             return response()->json(['message' => 'Endpoint ini khusus admin.'], 403);
         }
 

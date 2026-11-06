@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
  *
  *   ESP32 --POST /api/sensors/readings (X-Device-Key)--> store()
  *   FE    --GET  /api/sensors/snapshot?koridor_id=1----> snapshot()   (semua jenis, 1 request)
+ *   Admin --GET  /api/sensors/snapshots----------------> snapshots()  (semua koridor, 1 request)
  *   FE    --GET  /api/sensors/active-------------------> active()     (wilayah yang sedang ON)
  *   Admin --GET  /api/sensors/history?sensor_type=...--> history()
  *
@@ -31,6 +32,9 @@ class SensorReadingController extends Controller
 {
     private const SNAPSHOT_TTL_SECONDS = 15;
     private const ACTIVE_CACHE_KEY = 'sensor:active_koridor';
+    private const ALL_SNAPSHOTS_CACHE_KEY = 'sensor:snapshots';
+    /** Id koridor dari query string dipakai sebagai bagian kunci cache — batasi bentuknya. */
+    private const KORIDOR_ID_RULE = ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9_-]+$/'];
 
     public function store(Request $request)
     {
@@ -74,11 +78,12 @@ class SensorReadingController extends Controller
                 'koridor_id' => $aktif > 0 ? (string) $aktif : null,
                 'at' => time(),
             ]);
-            $device->forceFill(['last_seen_at' => now()])->save();
         }
 
         if (!$groups && $reportsActive) {
             // Semua wilayah OFF: tidak ada bacaan untuk disimpan, tapi status aktif sudah tercatat.
+            $device->forceFill(['last_seen_at' => now()])->save();
+
             return response()->json(['ok' => true, 'n' => 0, 't' => time()], 201);
         }
         if (!$groups) {
@@ -104,6 +109,9 @@ class SensorReadingController extends Controller
         foreach (array_keys($groups) as $koridorId) {
             Cache::forget($this->snapshotCacheKey($koridorId === '' ? null : (string) $koridorId));
         }
+        // Snapshot gabungan ("semua koridor" & versi tanpa filter) ikut basi saat ada data baru.
+        Cache::forget($this->snapshotCacheKey(null));
+        Cache::forget(self::ALL_SNAPSHOTS_CACHE_KEY);
 
         // Balasan sengaja sekecil mungkin (hemat RAM/bandwidth ESP32).
         // `t` = jam server (epoch) supaya ESP bisa menyetel jam tanpa NTP.
@@ -134,6 +142,11 @@ class SensorReadingController extends Controller
      */
     public function snapshot(Request $request)
     {
+        $validator = Validator::make($request->query(), ['koridor_id' => self::KORIDOR_ID_RULE]);
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Parameter tidak valid', 'errors' => $validator->errors()], 422);
+        }
+
         $koridorId = $request->query('koridor_id');
         $koridorId = is_scalar($koridorId) && $koridorId !== '' ? (string) $koridorId : null;
 
@@ -141,6 +154,23 @@ class SensorReadingController extends Controller
             $this->snapshotCacheKey($koridorId),
             self::SNAPSHOT_TTL_SECONDS,
             fn () => $this->buildSnapshot($koridorId),
+        );
+
+        return response()->json($payload);
+    }
+
+    /**
+     * Snapshot SEMUA koridor sekaligus: { snapshots: { "1": {koridor_id, updated_at, is_stale, readings}, ... } }.
+     * Dashboard admin memuat kondisi tiap koridor; sebelumnya itu N request /snapshot paralel
+     * di setiap polling, sekarang cukup satu request + satu query. Koridor yang belum punya
+     * bacaan sama sekali tidak muncul di `snapshots` (FE menganggapnya kosong).
+     */
+    public function snapshots()
+    {
+        $payload = Cache::remember(
+            self::ALL_SNAPSHOTS_CACHE_KEY,
+            self::SNAPSHOT_TTL_SECONDS,
+            fn () => $this->buildAllSnapshots(),
         );
 
         return response()->json($payload);
@@ -165,7 +195,46 @@ class SensorReadingController extends Controller
             ->get()
             ->unique('sensor_type');
 
-        $threshold = Carbon::now()->subMinutes(SensorReadingModel::FRESHNESS_WINDOW_MINUTES);
+        return $this->formatSnapshot($koridorId, $latest, $this->freshnessThreshold());
+    }
+
+    private function buildAllSnapshots(): array
+    {
+        // Satu query untuk semua koridor: baris terbaru per (koridor_id, sensor_type).
+        $latest = SensorReadingModel::query()
+            ->from('sensor_readings as r')
+            ->joinSub(
+                SensorReadingModel::query()
+                    ->select('koridor_id', 'sensor_type', DB::raw('MAX(recorded_at) as max_at'))
+                    ->whereNotNull('koridor_id')
+                    ->groupBy('koridor_id', 'sensor_type'),
+                'm',
+                fn ($j) => $j->on('r.koridor_id', '=', 'm.koridor_id')
+                    ->on('r.sensor_type', '=', 'm.sensor_type')
+                    ->on('r.recorded_at', '=', 'm.max_at'),
+            )
+            ->select('r.*')
+            ->orderByDesc('r.id')
+            ->get()
+            ->unique(fn ($r) => $r->koridor_id . '|' . $r->sensor_type);
+
+        $threshold = $this->freshnessThreshold();
+        $snapshots = [];
+        foreach ($latest->groupBy('koridor_id') as $koridorId => $rows) {
+            $snapshots[(string) $koridorId] = $this->formatSnapshot((string) $koridorId, $rows, $threshold);
+        }
+
+        return ['snapshots' => (object) $snapshots];
+    }
+
+    private function freshnessThreshold(): Carbon
+    {
+        return Carbon::now()->subMinutes(SensorReadingModel::FRESHNESS_WINDOW_MINUTES);
+    }
+
+    /** @param \Illuminate\Support\Collection<int, SensorReadingModel> $latest satu baris terbaru per sensor_type */
+    private function formatSnapshot(?string $koridorId, $latest, Carbon $threshold): array
+    {
         $readings = [];
         foreach ($latest as $row) {
             $readings[$row->sensor_type] = [

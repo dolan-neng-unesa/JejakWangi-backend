@@ -23,22 +23,28 @@ Route::get('/festivals/{id}', [FestivalController::class, 'show']);
 
 // Green space & koridor — menggantikan koleksi Firestore `green_space`/`koridor`
 // yang kosong (lihat KoridorController).
-Route::get('/green-spaces', [GreenSpaceController::class, 'index']);
-Route::get('/koridors', [KoridorController::class, 'index']);
-Route::get('/koridors/{id}', [KoridorController::class, 'show']);
+// Data referensi yang jarang berubah & tidak ada CRUD-nya di admin: boleh di-cache browser
+// 60 dtk + ETag (revalidasi 304 murah), jadi FE yang membuka beberapa halaman berturut-turut
+// tidak mengulang request yang sama.
+Route::middleware('cache.headers:public;max_age=60;etag')->group(function () {
+    Route::get('/green-spaces', [GreenSpaceController::class, 'index']);
+    Route::get('/koridors', [KoridorController::class, 'index']);
+    Route::get('/koridors/{id}', [KoridorController::class, 'show']);
+});
 
 // Sensor. ESP32 mengirim lewat POST (autentikasi X-Device-Key + throttle per
 // perangkat); FE membaca snapshot semua jenis sensor dalam satu request.
 Route::post('/sensors/readings', [SensorReadingController::class, 'store'])
     ->middleware(['device', 'throttle:sensor-ingest']);
 Route::get('/sensors/snapshot', [SensorReadingController::class, 'snapshot']);
+Route::get('/sensors/snapshots', [SensorReadingController::class, 'snapshots']); // semua koridor sekaligus (dashboard admin)
 Route::get('/sensors/active', [SensorReadingController::class, 'active']); // wilayah yang sedang ON (home)
 Route::get('/sensors/history', [SensorReadingController::class, 'history']); // tren harian, Monitoring Lingkungan (admin)
 
 // Autentikasi (Sanctum, token-based — cocok untuk PWA/mobile).
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->group(function () {
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
 });
@@ -49,18 +55,20 @@ Route::middleware('auth:sanctum')->group(function () {
 // valid, MoodLogController tetap mengenali user lewat $request->user('sanctum')
 // (guard sanctum bisa dipanggil langsung tanpa middleware), jadi login tetap
 // opsional, bukan wajib.
-Route::post('/mood-logs', [MoodLogController::class, 'store']);
+Route::post('/mood-logs', [MoodLogController::class, 'store'])->middleware('throttle:mood-store');
 Route::get('/mood-logs/summary', [MoodLogController::class, 'summary']);
 
 // Geofencing & Soundscape Therapy. `index` publik (dipakai svarga-app dan
 // tabel manajemen zona di admin lewat ?all=1); `store` khusus admin.
 Route::get('/geofences', [GeofenceController::class, 'index']);
-Route::get('/soundscapes', [SoundscapeController::class, 'index']);
-Route::get('/soundscapes/{id}', [SoundscapeController::class, 'show']);
+Route::middleware('cache.headers:public;max_age=60;etag')->group(function () {
+    Route::get('/soundscapes', [SoundscapeController::class, 'index']);
+    Route::get('/soundscapes/{id}', [SoundscapeController::class, 'show']);
+});
 
 // Endpoint khusus dashboard admin (svarga-admin) — menggantikan Prisma/Supabase
 // sepenuhnya. Semua di-guard ['auth:sanctum', 'admin'] (lihat EnsureUserIsAdmin).
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/users', [AdminUserController::class, 'index']);
         Route::post('/users', [AdminUserController::class, 'store']);

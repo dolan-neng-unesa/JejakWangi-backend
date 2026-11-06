@@ -4,23 +4,36 @@ namespace Database\Seeders;
 
 use App\Models\UserModel;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 // Menggantikan AdminUser (Prisma/Supabase) yang sebelumnya dipakai login
-// svarga-admin. Kredensial demo sama seperti mode mock lama di
-// svarga-admin/app/api/auth/login/route.js supaya tidak membingungkan tim:
-// admin@svarga.id / svarga123 — GANTI di produksi.
+// svarga-admin. Di lingkungan lokal/test kredensial demo tetap admin@svarga.id / svarga123.
+//
+// Keamanan:
+//  - Di produksi WAJIB mengisi ADMIN_SEED_PASSWORD (dan opsional ADMIN_SEED_EMAIL) di .env;
+//    seeder menolak berjalan dengan sandi demo.
+//  - Sandi HANYA diatur saat akun dibuat. Versi lama memakai updateOrCreate sehingga setiap
+//    `db:seed` (mis. saat deploy) mereset sandi admin kembali ke sandi demo.
 class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        UserModel::updateOrCreate(
-            ['email' => 'admin@svarga.id'],
-            [
-                'name' => 'Ahmad Fauzi',
-                'password' => Hash::make('svarga123'),
-                'is_admin' => true,
-            ]
-        );
+        $email = env('ADMIN_SEED_EMAIL', 'admin@svarga.id');
+        $password = env('ADMIN_SEED_PASSWORD');
+
+        if (!$password) {
+            if (app()->isProduction()) {
+                throw new \RuntimeException('Set ADMIN_SEED_PASSWORD di .env sebelum menjalankan AdminUserSeeder di produksi.');
+            }
+            $password = 'svarga123';
+        }
+
+        $admin = UserModel::firstOrNew(['email' => $email]);
+        if (!$admin->exists) {
+            $admin->name = 'Ahmad Fauzi';
+            $admin->password = $password; // cast 'hashed' di UserModel
+        }
+        $admin->is_admin = true;
+        $admin->is_active = true;
+        $admin->save();
     }
 }

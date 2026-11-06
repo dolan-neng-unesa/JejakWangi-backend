@@ -17,8 +17,7 @@ class UmkmController extends Controller
             $query->where('koridor_id', $request->query('koridor_id'));
         }
 
-        $perPage = (int) $request->query('per_page', 10);
-        $umkms = $query->orderBy('business_name')->paginate($perPage);
+        $umkms = $query->orderBy('business_name')->orderBy('id')->paginate($this->perPage($request));
 
         return response()->json([
             'data' => UmkmResource::collection($umkms->items()),

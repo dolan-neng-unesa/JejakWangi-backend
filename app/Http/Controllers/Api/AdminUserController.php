@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * Endpoint khusus dashboard admin (svarga-admin) — menggantikan
@@ -23,13 +24,19 @@ class AdminUserController extends Controller
     {
         $perPage = max(1, min(100, (int) $request->query('per_page', 5)));
 
-        $query = UserModel::query()->orderByDesc('created_at');
+        $query = UserModel::query()->orderByDesc('created_at')->orderByDesc('id');
 
         // Pencarian nama/email + filter status — dikerjakan di sisi server
         // supaya hasilnya benar lintas halaman (bukan cuma halaman yang tampil).
+        // Wildcard LIKE (% dan _) dari input di-escape: tanpa itu pencarian "_" atau "%"
+        // cocok dengan semua baris. Escape char '!' dipakai karena portabel lintas
+        // SQLite/MySQL/PostgreSQL (backslash diperlakukan beda tiap driver).
         if ($request->filled('q')) {
-            $term = '%' . $request->query('q') . '%';
-            $query->where(fn ($w) => $w->where('name', 'like', $term)->orWhere('email', 'like', $term));
+            $raw = mb_substr(trim((string) $request->query('q')), 0, 100);
+            $term = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $raw) . '%';
+            $query->where(fn ($w) => $w
+                ->whereRaw("name LIKE ? ESCAPE '!'", [$term])
+                ->orWhereRaw("email LIKE ? ESCAPE '!'", [$term]));
         }
         if ($request->query('status') === 'aktif') {
             $query->where('is_active', true);
@@ -39,25 +46,38 @@ class AdminUserController extends Controller
 
         $users = $query->paginate($perPage);
 
+        // Empat hitungan ringkasan dalam SATU query (sebelumnya 4 query COUNT terpisah).
+        $stats = UserModel::query()->selectRaw(
+            'COUNT(*) as total,
+             SUM(CASE WHEN is_active THEN 1 ELSE 0 END) as aktif,
+             SUM(CASE WHEN is_active THEN 0 ELSE 1 END) as nonaktif,
+             SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as baru',
+            [now()->subDays(7)]
+        )->first();
+
         return response()->json([
             'data' => AdminUserResource::collection($users->items())->resolve(),
             'page' => $users->currentPage(),
             'last_page' => $users->lastPage(),
             'per_page' => $users->perPage(),
             'filtered_total' => $users->total(),
-            'total' => UserModel::count(),
-            'aktif' => UserModel::where('is_active', true)->count(),
-            'nonaktif' => UserModel::where('is_active', false)->count(),
-            'baru_7_hari' => UserModel::where('created_at', '>=', now()->subDays(7))->count(),
+            'total' => (int) $stats->total,
+            'aktif' => (int) $stats->aktif,
+            'nonaktif' => (int) $stats->nonaktif,
+            'baru_7_hari' => (int) $stats->baru,
         ]);
     }
 
     public function store(Request $request)
     {
+        if (is_string($request->input('email'))) {
+            $request->merge(['email' => mb_strtolower(trim($request->input('email')))]);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:8', 'max:128'],
             'is_admin' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
@@ -85,10 +105,14 @@ class AdminUserController extends Controller
     {
         $user = UserModel::findOrFail($id);
 
+        if (is_string($request->input('email'))) {
+            $request->merge(['email' => mb_strtolower(trim($request->input('email')))]);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string', 'min:6'],
+            'password' => ['nullable', 'string', 'min:8', 'max:128'],
             'is_admin' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
@@ -110,13 +134,21 @@ class AdminUserController extends Controller
             }
         }
 
-        if (!empty($data['password'])) {
+        $passwordChanged = !empty($data['password']);
+        if ($passwordChanged) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
         }
 
         $user->update($data);
+
+        // Akun dinonaktifkan atau kata sandi diganti → semua sesi/token lama harus mati,
+        // kalau tidak token yang sudah terbit tetap berlaku sampai kedaluwarsa. Bila yang
+        // diubah akun admin sendiri, token yang sedang dipakai dipertahankan.
+        if ($passwordChanged || (array_key_exists('is_active', $data) && !$data['is_active'])) {
+            $this->revokeTokens($request, $user);
+        }
 
         return response()->json(['message' => 'Pengguna berhasil diperbarui', 'data' => new AdminUserResource($user)]);
     }
@@ -129,33 +161,69 @@ class AdminUserController extends Controller
             return response()->json(['message' => 'Tidak bisa menghapus akun sendiri.'], 422);
         }
 
+        // personal_access_tokens bersifat polimorfik (tanpa FK cascade) — hapus manual
+        // supaya tidak ada token yatim tersisa.
+        $user->tokens()->delete();
         $user->delete();
 
         return response()->json(['message' => 'Pengguna berhasil dihapus']);
     }
 
     /**
-     * Tren bulanan pendaftaran pengguna vs catatan mood, 5 bulan terakhir —
+     * Tren bulanan pendaftaran pengguna vs catatan mood, N bulan terakhir (maks. 24) —
      * dipakai grafik "Aktivitas Pengguna vs Catatan Mood" di halaman
-     * Laporan & Analitik admin.
+     * Laporan & Analitik admin. Dua query total (satu per tabel, SUM(CASE) per bulan),
+     * bukan 2×N query seperti sebelumnya, dan `months` dibatasi supaya tidak bisa dipakai
+     * membebani server (?months=100000).
      */
     public function activityMonthly(Request $request)
     {
-        $months = (int) ($request->query('months') ?? 5);
+        $months = max(1, min(24, (int) ($request->query('months') ?? 5)));
         $bulanLabel = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-        $result = [];
+        $ranges = [];
         for ($i = $months - 1; $i >= 0; $i--) {
-            $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
-            $monthEnd = $monthStart->copy()->endOfMonth();
+            $start = Carbon::now()->subMonths($i)->startOfMonth();
+            $ranges[] = [$start, $start->copy()->endOfMonth()];
+        }
 
+        $bucket = function ($model, string $column) use ($ranges) {
+            $select = [];
+            $bindings = [];
+            foreach ($ranges as $k => [$start, $end]) {
+                $select[] = "SUM(CASE WHEN {$column} BETWEEN ? AND ? THEN 1 ELSE 0 END) as m{$k}";
+                array_push($bindings, $start, $end);
+            }
+
+            return $model::query()
+                ->where($column, '>=', $ranges[0][0])
+                ->selectRaw(implode(', ', $select), $bindings)
+                ->first();
+        };
+
+        $users = $bucket(UserModel::class, 'created_at');
+        $moods = $bucket(MoodLogModel::class, 'logged_at');
+
+        $result = [];
+        foreach ($ranges as $k => [$start]) {
             $result[] = [
-                'bulan' => $bulanLabel[$monthStart->month - 1],
-                'aktif' => UserModel::whereBetween('created_at', [$monthStart, $monthEnd])->count(),
-                'catatan_mood' => MoodLogModel::whereBetween('logged_at', [$monthStart, $monthEnd])->count(),
+                'bulan' => $bulanLabel[$start->month - 1],
+                'aktif' => (int) ($users->{"m{$k}"} ?? 0),
+                'catatan_mood' => (int) ($moods->{"m{$k}"} ?? 0),
             ];
         }
 
         return response()->json(['data' => $result]);
+    }
+
+    /** Cabut token pengguna; token yang sedang dipakai request ini (kalau milik akun yang sama) dipertahankan. */
+    private function revokeTokens(Request $request, UserModel $user): void
+    {
+        $current = $request->user('sanctum')?->currentAccessToken();
+        $keep = ($request->user('sanctum')?->id === $user->id && $current instanceof PersonalAccessToken)
+            ? $current->id
+            : null;
+
+        $user->tokens()->when($keep, fn ($q) => $q->where('id', '!=', $keep))->delete();
     }
 }
