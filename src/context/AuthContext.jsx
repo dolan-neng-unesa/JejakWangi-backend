@@ -14,12 +14,30 @@ export function AuthProvider({ children }) {
   useEffect(() => { setUnauthorizedHandler(clear); }, [clear]);
 
   // Pulihkan sesi dari token tersimpan.
+  // Hanya penolakan dari server (401 token dicabut/kedaluwarsa, 403 akun dinonaktifkan) yang
+  // menghapus token. Server yang sedang restart / jaringan putus TIDAK boleh membuat admin
+  // ter-logout: dicoba ulang beberapa kali, dan bila tetap gagal token dipertahankan
+  // (halaman login muncul, muat ulang akan mencoba lagi).
   useEffect(() => {
-    if (!getToken()) return;
-    auth.me()
-      .then((u) => { if (u?.is_admin) setUser(u); else clear(); })
-      .catch(clear)
-      .finally(() => setBooting(false));
+    if (!getToken()) return undefined;
+    let cancelled = false;
+
+    (async () => {
+      for (let attempt = 0; attempt < 4 && !cancelled; attempt++) {
+        try {
+          const u = await auth.me();
+          if (cancelled) return;
+          if (u?.is_admin) setUser(u); else clear();
+          break;
+        } catch (err) {
+          if (err instanceof ApiError && (err.status === 401 || err.status === 403)) { if (!cancelled) clear(); break; }
+          if (attempt < 3) await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+        }
+      }
+      if (!cancelled) setBooting(false);
+    })();
+
+    return () => { cancelled = true; };
   }, [clear]);
 
   const login = useCallback(async (email, password) => {

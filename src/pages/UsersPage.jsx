@@ -146,8 +146,8 @@ function UserForm({ mode, user, me, onClose, onSaved }) {
     const err = {};
     if (!f.name.trim()) err.name = "Nama wajib diisi.";
     if (!/^\S+@\S+\.\S+$/.test(f.email)) err.email = "Email tidak valid.";
-    if (!edit && f.password.length < 6) err.password = "Kata sandi minimal 6 karakter.";
-    if (edit && f.password && f.password.length < 6) err.password = "Kata sandi minimal 6 karakter.";
+    if (!edit && f.password.length < 8) err.password = "Kata sandi minimal 8 karakter.";
+    if (edit && f.password && f.password.length < 8) err.password = "Kata sandi minimal 8 karakter.";
     setErrors(err);
     if (Object.keys(err).length) return;
 
@@ -170,7 +170,7 @@ function UserForm({ mode, user, me, onClose, onSaved }) {
       <form onSubmit={submit} className="space-y-4" noValidate>
         <Field label="Nama lengkap" required error={errors.name} htmlFor="u-name"><Input id="u-name" value={f.name} onChange={(e) => set("name")(e.target.value)} invalid={!!errors.name} autoFocus /></Field>
         <Field label="Email" required error={errors.email} htmlFor="u-email"><Input id="u-email" type="email" value={f.email} onChange={(e) => set("email")(e.target.value)} invalid={!!errors.email} /></Field>
-        <Field label={edit ? "Kata sandi baru" : "Kata sandi"} required={!edit} error={errors.password} hint={edit ? "Kosongkan bila tidak ingin mengubah." : "Minimal 6 karakter."} htmlFor="u-pass">
+        <Field label={edit ? "Kata sandi baru" : "Kata sandi"} required={!edit} error={errors.password} hint={edit ? "Kosongkan bila tidak ingin mengubah." : "Minimal 8 karakter."} htmlFor="u-pass">
           <Input id="u-pass" type="password" autoComplete="new-password" value={f.password} onChange={(e) => set("password")(e.target.value)} invalid={!!errors.password} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">

@@ -8,4 +8,5 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: { port: 5174, host: true },
   preview: { port: 5174, host: true },
+  test: { environment: "jsdom", include: ["src/**/*.test.{js,jsx}"] },
 });

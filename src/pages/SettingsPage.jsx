@@ -72,7 +72,7 @@ function ProfileTab() {
     const e = {};
     if (!f.name.trim()) e.name = "Nama wajib diisi.";
     if (!/^\S+@\S+\.\S+$/.test(f.email)) e.email = "Email tidak valid.";
-    if (f.password && f.password.length < 6) e.password = "Minimal 6 karakter.";
+    if (f.password && f.password.length < 8) e.password = "Minimal 8 karakter.";
     if (f.password !== f.confirm) e.confirm = "Konfirmasi tidak sama.";
     setErr(e);
     if (Object.keys(e).length) return;

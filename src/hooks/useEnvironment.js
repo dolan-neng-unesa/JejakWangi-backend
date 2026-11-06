@@ -1,6 +1,7 @@
 import { useAsync } from "./useAsync";
 import { content, geofences as geofencesApi, loadKoridorSnapshots } from "../services/svarga";
 import { avg, mergeCondition } from "../lib/env";
+import { cachedStatic } from "../lib/staticCache";
 
 /** Nama pendek koridor untuk label: "Koridor 2: Kalilo" → "Kalilo". */
 export const koridorLabel = (k) => (k?.formal_name?.includes(":") ? k.formal_name.split(":").pop().trim() : k?.short_name || `Koridor ${k?.id}`);
@@ -8,14 +9,16 @@ export const koridorLabel = (k) => (k?.formal_name?.includes(":") ? k.formal_nam
 /**
  * Muat koridor + green space + zona geofence + snapshot sensor tiap koridor,
  * lalu gabungkan live/baseline (lihat lib/env.js → mergeCondition).
+ * Tiga daftar pertama jarang berubah, jadi di-cache 60 dtk (lib/staticCache.js); hanya snapshot
+ * sensor yang diunduh ulang di tiap polling.
  */
 export function useEnvironment({ interval = 0 } = {}) {
   return useAsync(async () => {
-    const [koridors, greenSpaces, zones] = await Promise.all([
+    const [koridors, greenSpaces, zones] = await cachedStatic(() => Promise.all([
       content.koridors(),
       content.greenSpaces().catch(() => []),
       geofencesApi.list().catch(() => []),
-    ]);
+    ]));
     const snaps = await loadKoridorSnapshots(koridors);
     const conditions = koridors.map((k) => mergeCondition(k, snaps[k.id]));
     return { koridors, greenSpaces, zones, snaps, conditions };

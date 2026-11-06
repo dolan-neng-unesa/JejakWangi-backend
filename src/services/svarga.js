@@ -1,6 +1,7 @@
 // Seluruh pemanggilan endpoint svarga-backend dikumpulkan di sini supaya halaman
 // tidak perlu tahu bentuk URL/response Laravel (Resource membungkus di `data`).
-import { api, unwrap } from "../lib/api";
+import { api, ApiError, unwrap } from "../lib/api";
+import { invalidateStatic } from "../lib/staticCache";
 
 export const auth = {
   login: (email, password) => api.post("/auth/login", { email, password }, { auth: false }), // → { user, token }
@@ -28,11 +29,14 @@ export const festivals = {
   remove: (id) => api.del(`/festivals/${id}`),
 };
 
+// Zona geofence ikut di cache data statis useEnvironment — buang cache setelah tiap mutasi.
+const afterMutation = (res) => { invalidateStatic(); return res; };
+
 export const geofences = {
   list: async () => unwrap(await api.get("/geofences", { all: 1 })),
-  create: (body) => api.post("/geofences", body),
-  update: (id, body) => api.put(`/geofences/${id}`, body),
-  remove: (id) => api.del(`/geofences/${id}`),
+  create: (body) => api.post("/geofences", body).then(afterMutation),
+  update: (id, body) => api.put(`/geofences/${id}`, body).then(afterMutation),
+  remove: (id) => api.del(`/geofences/${id}`).then(afterMutation),
 };
 
 export const content = {
@@ -44,6 +48,7 @@ export const content = {
 
 export const sensors = {
   snapshot: (koridorId) => api.get("/sensors/snapshot", { koridor_id: koridorId }),
+  snapshots: () => api.get("/sensors/snapshots"), // → { snapshots: { "<koridor_id>": {...}, ... } } (semua koridor, 1 request)
   active: () => api.get("/sensors/active"),
   history: (params) => api.get("/sensors/history", params), // sensor_type, koridor_id, days
 };
@@ -68,8 +73,23 @@ export const settings = {
   downloadBackup: (file) => api.download("/admin/backup/download", { file }, file),
 };
 
-/** Kondisi lingkungan semua koridor: snapshot per koridor (paralel). */
+const emptySnapshot = (id) => ({ koridor_id: String(id), updated_at: null, is_stale: true, readings: {} });
+
+/**
+ * Kondisi lingkungan semua koridor. Memakai endpoint massal /sensors/snapshots (1 request,
+ * 1 query di server) alih-alih satu request per koridor di setiap polling. Backend lama yang
+ * belum punya endpoint itu (404) otomatis jatuh ke mode per-koridor. Koridor tanpa bacaan
+ * mendapat snapshot kosong (is_stale: true) — sama seperti respons per-koridor sebelumnya.
+ */
 export async function loadKoridorSnapshots(koridors) {
+  try {
+    const all = (await sensors.snapshots())?.snapshots ?? {};
+    return Object.fromEntries(koridors.map((k) => [k.id, all[String(k.id)] ?? emptySnapshot(k.id)]));
+  } catch (err) {
+    if (!(err instanceof ApiError) || err.status !== 404) {
+      return Object.fromEntries(koridors.map((k) => [k.id, null])); // server bermasalah: kondisi baseline
+    }
+  }
   const results = await Promise.all(
     koridors.map((k) => sensors.snapshot(k.id).then((s) => [k.id, s]).catch(() => [k.id, null]))
   );

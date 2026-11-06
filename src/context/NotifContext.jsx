@@ -42,8 +42,11 @@ export function NotifProvider({ children }) {
   useEffect(() => {
     if (!user) { lastId.current = null; setUnread(0); return undefined; }
     refresh();
-    const t = setInterval(refresh, POLL_MS);
-    return () => clearInterval(t);
+    // Jangan polling saat tab tersembunyi; segarkan langsung begitu terlihat lagi.
+    const tick = () => { if (!document.hidden) refresh(); };
+    const t = setInterval(tick, POLL_MS);
+    document.addEventListener("visibilitychange", tick);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", tick); };
   }, [user, refresh]);
 
   const v = useMemo(() => ({ unread, refresh, setUnread }), [unread, refresh]);

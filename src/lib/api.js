@@ -5,12 +5,15 @@ export const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:8000/
 const TOKEN_KEY = "svarga-admin:token";
 
 export class ApiError extends Error {
-  constructor(message, status = 0, errors = null) {
+  constructor(message, status = 0, errors = null, retryAfter = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.errors = errors; // { field: [pesan, ...] } untuk 422
+    this.retryAfter = retryAfter; // detik, dari header Retry-After pada 429
   }
+  /** true untuk kegagalan tanpa respons HTTP (server mati / jaringan putus / timeout). */
+  get isNetwork() { return this.status === 0; }
   /** Pesan validasi pertama (kalau ada) — dipakai untuk toast ringkas. */
   get firstError() {
     if (!this.errors) return this.message;
@@ -37,11 +40,24 @@ function buildUrl(path, query) {
   return url.toString();
 }
 
-async function send(method, path, { query, body, auth = true, signal } = {}) {
+const DEFAULT_TIMEOUT_MS = 15_000;
+
+async function send(method, path, { query, body, auth = true, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const headers = { Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const token = getToken();
   if (auth && token) headers.Authorization = `Bearer ${token}`;
+
+  // Timeout: tanpa ini server yang menggantung membuat tombol/halaman "memuat" selamanya.
+  // Pembatalan dari pemanggil (signal) tetap diteruskan sebagai AbortError biasa.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+  const onCallerAbort = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener("abort", onCallerAbort, { once: true });
+  }
 
   let res;
   try {
@@ -49,11 +65,19 @@ async function send(method, path, { query, body, auth = true, signal } = {}) {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal,
+      signal: controller.signal,
     });
   } catch (err) {
-    if (err?.name === "AbortError") throw err;
-    throw new ApiError(`Tidak dapat terhubung ke server (${API_BASE}). Pastikan backend Laravel sedang berjalan.`, 0);
+    if (err?.name === "AbortError" && !timedOut) throw err;
+    throw new ApiError(
+      timedOut
+        ? "Server terlalu lama merespons. Coba lagi."
+        : `Tidak dapat terhubung ke server (${API_BASE}). Pastikan backend Laravel sedang berjalan.`,
+      0
+    );
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onCallerAbort);
   }
   return res;
 }
@@ -65,11 +89,21 @@ async function parse(res) {
   return data;
 }
 
+/** 429 dari rate limiter Laravel: pesan bawaannya berbahasa Inggris & tanpa hitung mundur. */
+function throttleMessage(res) {
+  const wait = Number(res.headers.get("Retry-After")) || null;
+  return [wait ? `Terlalu banyak percobaan. Coba lagi dalam ${wait} detik.` : "Terlalu banyak percobaan. Coba lagi sebentar lagi.", wait];
+}
+
 async function request(method, path, opts = {}) {
   const res = await send(method, path, opts);
   const data = await parse(res);
   if (!res.ok) {
     if (res.status === 401 && opts.auth !== false && onUnauthorized) onUnauthorized();
+    if (res.status === 429) {
+      const [message, wait] = throttleMessage(res);
+      throw new ApiError(message, 429, null, wait);
+    }
     throw new ApiError(data?.message || `Permintaan gagal (${res.status}).`, res.status, data?.errors ?? null);
   }
   return data;
@@ -83,7 +117,7 @@ export const api = {
 
   /** Unduh file biner (mis. backup) dengan header Authorization lalu simpan lewat <a download>. */
   async download(path, query, filename = "download") {
-    const res = await send("GET", path, { query });
+    const res = await send("GET", path, { query, timeoutMs: 120_000 }); // backup bisa besar
     if (!res.ok) {
       const data = await parse(res);
       if (res.status === 401 && onUnauthorized) onUnauthorized();

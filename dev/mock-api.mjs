@@ -110,6 +110,9 @@ const server = http.createServer(async (req, res) => {
     if (!k || k === "1") return send(res, 200, { koridor_id: k ?? null, updated_at: iso(ago(1)), is_stale: false, readings: liveReadings() });
     return send(res, 200, { koridor_id: k, updated_at: null, is_stale: true, readings: {} });
   }
+  if (m === "GET" && p === "/sensors/snapshots") {
+    return send(res, 200, { snapshots: { 1: { koridor_id: "1", updated_at: iso(ago(1)), is_stale: false, readings: liveReadings() } } });
+  }
   if (m === "GET" && p === "/sensors/active") return send(res, 200, { koridor_id: "1", updated_at: iso(ago(1)), is_stale: false });
   if (m === "GET" && p === "/sensors/history") {
     const days = +q.days || 7; const has = !q.koridor_id || q.koridor_id === "1";

@@ -1,20 +1,32 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
-import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import MonitoringPage from "./pages/MonitoringPage";
-import SmartGreenRoutePage from "./pages/SmartGreenRoutePage";
-import FestivalPage from "./pages/FestivalPage";
-import SensorIotPage from "./pages/SensorIotPage";
-import MoodPage from "./pages/MoodPage";
-import GeofencingPage from "./pages/GeofencingPage";
-import ReportsPage from "./pages/ReportsPage";
-import UsersPage from "./pages/UsersPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import SettingsPage from "./pages/SettingsPage";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// Tiap halaman dipecah jadi chunk sendiri: admin hanya mengunduh halaman yang dibuka
+// (grafik Recharts, peta Leaflet, dsb. tidak ikut dimuat di halaman login/pengguna).
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const MonitoringPage = lazy(() => import("./pages/MonitoringPage"));
+const SmartGreenRoutePage = lazy(() => import("./pages/SmartGreenRoutePage"));
+const FestivalPage = lazy(() => import("./pages/FestivalPage"));
+const SensorIotPage = lazy(() => import("./pages/SensorIotPage"));
+const MoodPage = lazy(() => import("./pages/MoodPage"));
+const GeofencingPage = lazy(() => import("./pages/GeofencingPage"));
+const ReportsPage = lazy(() => import("./pages/ReportsPage"));
+const UsersPage = lazy(() => import("./pages/UsersPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+
+const Loading = () => (
+  <div className="h-full min-h-[40vh] flex items-center justify-center text-muted text-sm" role="status">Memuat halaman…</div>
+);
 
 export default function App() {
+  const { pathname } = useLocation();
   return (
+    <ErrorBoundary resetKey={pathname}>
+    <Suspense fallback={<Loading />}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<AppLayout />}>
@@ -32,5 +44,7 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
+    </ErrorBoundary>
   );
 }
