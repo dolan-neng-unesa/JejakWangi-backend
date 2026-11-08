@@ -1,0 +1,28 @@
+// =====================================================
+// KONFIGURASI JEJAK WANGI — EDIT DI SINI SAJA
+// File ini berisi password & kunci API: JANGAN dibagikan / di-upload ke GitHub
+// (tambahkan "config.h" ke .gitignore).
+// =====================================================
+#pragma once
+
+// ---------- WiFi ----------
+#define WIFI_SSID      "NAMA_WIFI"
+#define WIFI_PASS      "PASSWORD_WIFI"
+
+// ---------- Server (backend Laravel JEJAK WANGI) ----------
+#define SERVER_URL     "https://jejakwangi.sadewa-teknik.com/api/sensors/readings"
+// Kunci dari:  php artisan devices:register jejak-wangi-01
+// (kunci hanya tampil sekali; hilang/bocor -> jalankan perintah yang sama lagi)
+#define DEVICE_TOKEN   "svg_ISI_DENGAN_KUNCI_PERANGKAT"
+#define DEVICE_HOST    "jejak-wangi-01"      // nama perangkat di jaringan
+
+// ---------- Waktu ----------
+#define INTERVAL_KIRIM_MS    10000UL  // kirim semua wilayah tiap 10 detik (batas server: 20 request/menit)
+#define INTERVAL_SIMULASI_MS 4000UL   // perubahan data simulasi tiap 4 detik
+
+// ---------- Satuan ----------
+// Backend menyimpan CO dalam ug/m3 (bukan ppm) agar ISPU benar.
+// Pada 25 C, 1 atm: 1 ppm CO = 1145 ug/m3. Layar tetap menampilkan ppm.
+#define CO_PPM_KE_UGM3  1145.0f
+
+#define FW_VERSION     "1.2.0"
