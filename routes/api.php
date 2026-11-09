@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\AdminJejakWangiController;
 use App\Http\Controllers\Api\AdminNotificationController;
+use App\Http\Controllers\Api\ByoController;
+use App\Http\Controllers\Api\ChargerStationController;
+use App\Http\Controllers\Api\JejakWangiController;
 use App\Http\Controllers\Api\AdminSensorDeviceController;
 use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AdminUserController;
@@ -44,10 +48,29 @@ Route::get('/sensors/history', [SensorReadingController::class, 'history']); // 
 // Autentikasi (Sanctum, token-based — cocok untuk PWA/mobile).
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
+Route::post('/auth/social', [AuthController::class, 'social'])->middleware('throttle:auth-social');
+Route::get('/auth/providers', [AuthController::class, 'providers']); // penyedia login sosial yang aktif (untuk FE)
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+
+    // Jejak Wangi: aktivitas jalan kaki, poin, kupon misi (butuh login agar poin & kupon melekat ke akun).
+    Route::post('/activities', [JejakWangiController::class, 'storeActivity'])->middleware('throttle:60,1');
+    Route::get('/activities', [JejakWangiController::class, 'activities']);
+    Route::get('/me/summary', [JejakWangiController::class, 'summary']);
+    Route::get('/vouchers', [JejakWangiController::class, 'vouchers']);
+    Route::get('/vouchers/tiers', [JejakWangiController::class, 'tiers']);
+    Route::post('/vouchers/claim', [JejakWangiController::class, 'claim'])->middleware('throttle:20,1');
+    // Zero-waste: kasir menerbitkan QR, pelanggan memindai.
+    Route::post('/byo/token', [ByoController::class, 'issue'])->middleware('throttle:30,1');
+    Route::post('/byo/confirm', [ByoController::class, 'confirm'])->middleware('throttle:20,1');
+    Route::post('/vouchers/{id}/redeem', [JejakWangiController::class, 'redeemVoucher'])->whereNumber('id');
 });
+
+// Publik: leaderboard (nama disamarkan; token opsional untuk menandai baris milik sendiri) & charger station surya.
+Route::get('/leaderboard', [JejakWangiController::class, 'leaderboard']);
+Route::get('/chargers', [ChargerStationController::class, 'index']);
+Route::get('/chargers/{id}', [ChargerStationController::class, 'show'])->whereNumber('id');
 
 // Mood Tracker. `store` sengaja TIDAK memakai middleware auth:sanctum agar
 // mode tamu (anonim) tetap bisa mengirim mood sesuai Batasan 4.1 proposal —
@@ -74,6 +97,7 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::post('/users', [AdminUserController::class, 'store']);
         Route::put('/users/{id}', [AdminUserController::class, 'update']);
         Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
+        Route::get('/jejak-wangi/summary', [AdminJejakWangiController::class, 'summary']);
         Route::get('/activity-monthly', [AdminUserController::class, 'activityMonthly']);
         Route::get('/notifications', [AdminNotificationController::class, 'index']);
         Route::post('/notifications/mark-read', [AdminNotificationController::class, 'markAllRead']);

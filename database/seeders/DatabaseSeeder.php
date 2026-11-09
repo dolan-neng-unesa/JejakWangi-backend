@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             KoridorSeeder::class,
             AdminUserSeeder::class,
             AdminNotificationSeeder::class,
+            ChargerStationSeeder::class,
+            KasirDemoSeeder::class,
         ]);
     }
 }

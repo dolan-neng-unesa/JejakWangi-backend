@@ -29,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(30)->by($request->ip()),
         ]);
 
+        // Login sosial memanggil API penyedia di tiap request → batasi per IP agar tidak bisa dipakai
+        // membanjiri Google/Facebook lewat server kita.
+        RateLimiter::for('auth-social', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
+
         // Pendaftaran juga memicu notifikasi admin — batasi supaya tidak bisa membanjiri tabelnya.
         RateLimiter::for('auth-register', fn (Request $request) => Limit::perHour(20)->by($request->ip()));
 

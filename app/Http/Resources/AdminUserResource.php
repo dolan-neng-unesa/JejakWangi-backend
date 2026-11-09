@@ -18,6 +18,7 @@ class AdminUserResource extends JsonResource
             'email' => $this->email,
             'peran' => $this->is_admin ? 'Admin' : 'User',
             'is_admin' => (bool) $this->is_admin,
+            'umkm_id' => $this->umkm_id ? (int) $this->umkm_id : null,
             'is_active' => (bool) $this->is_active,
             'status' => $this->is_active ? 'Aktif' : 'NonAktif',
             'bergabung' => $this->created_at ? self::formatTanggalIndonesia($this->created_at) : null,

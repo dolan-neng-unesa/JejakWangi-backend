@@ -14,6 +14,8 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'is_admin' => (bool) $this->is_admin,
+            'umkm_id' => $this->umkm_id ? (int) $this->umkm_id : null, // akun kasir UMKM
+
         ];
     }
 }

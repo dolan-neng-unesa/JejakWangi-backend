@@ -80,6 +80,7 @@ class AdminUserController extends Controller
             'password' => ['required', 'string', 'min:8', 'max:128'],
             'is_admin' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
+            'umkm_id' => ['nullable', 'integer', 'exists:umkm_models,id'], // menjadikan akun ini kasir UMKM tsb
         ]);
 
         if ($validator->fails()) {
@@ -95,6 +96,10 @@ class AdminUserController extends Controller
             'is_admin' => $request->boolean('is_admin', false),
             'is_active' => $request->boolean('is_active', true),
         ]);
+        // umkm_id sengaja di luar $fillable (registrasi publik tidak boleh menjadikan diri kasir).
+        if ($request->filled('umkm_id')) {
+            $user->forceFill(['umkm_id' => (int) $request->input('umkm_id')])->save();
+        }
 
         AdminNotificationModel::notify('pengguna', 'Pengguna Baru Ditambahkan', "Akun {$user->email} dibuat oleh admin.");
 
@@ -115,6 +120,7 @@ class AdminUserController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'max:128'],
             'is_admin' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
+            'umkm_id' => ['sometimes', 'nullable', 'integer', 'exists:umkm_models,id'],
         ]);
 
         if ($validator->fails()) {
@@ -122,6 +128,10 @@ class AdminUserController extends Controller
         }
 
         $data = $validator->validated();
+        if (array_key_exists('umkm_id', $data)) {
+            $user->forceFill(['umkm_id' => $data['umkm_id']])->save();
+            unset($data['umkm_id']);
+        }
 
         // Cegah admin mencabut hak admin / menonaktifkan DIRINYA SENDIRI —
         // kalau tidak, satu klik salah bisa mengunci semua orang dari dashboard.
