@@ -12,6 +12,7 @@ const SmartGreenRoutePage = lazy(() => import("./pages/SmartGreenRoutePage"));
 const FestivalPage = lazy(() => import("./pages/FestivalPage"));
 const SensorIotPage = lazy(() => import("./pages/SensorIotPage"));
 const MoodPage = lazy(() => import("./pages/MoodPage"));
+const JejakWangiPage = lazy(() => import("./pages/JejakWangiPage"));
 const GeofencingPage = lazy(() => import("./pages/GeofencingPage"));
 const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="kalender-festival" element={<FestivalPage />} />
         <Route path="sensor-iot" element={<SensorIotPage />} />
         <Route path="mood-wellbeing" element={<MoodPage />} />
+        <Route path="jejak-wangi" element={<JejakWangiPage />} />
         <Route path="geofencing" element={<GeofencingPage />} />
         <Route path="laporan" element={<ReportsPage />} />
         <Route path="pengguna" element={<UsersPage />} />

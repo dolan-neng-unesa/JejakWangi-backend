@@ -53,6 +53,11 @@ export const sensors = {
   history: (params) => api.get("/sensors/history", params), // sensor_type, koridor_id, days
 };
 
+// Jejak Wangi: ringkasan agregat program (tanpa identitas pengguna). Lihat AdminJejakWangiController.
+export const jejakWangi = {
+  summary: async () => unwrap(await api.get("/admin/jejak-wangi/summary")),
+};
+
 export const mood = {
   summary: (params) => api.get("/mood-logs/summary", params),
 };

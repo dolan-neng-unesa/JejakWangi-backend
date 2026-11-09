@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Activity, BarChart3, Bell, CalendarDays, Cpu, Leaf, LayoutDashboard, LogOut, MapPin, Navigation, Settings, Smile, Users, X } from "lucide-react";
+import { Activity, BarChart3, Bell, CalendarDays, Cpu, Footprints, Leaf, LayoutDashboard, LogOut, MapPin, Navigation, Settings, Smile, Users, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
 import { useNotifBadge } from "../../context/NotifContext";
@@ -11,6 +11,7 @@ export const NAV = [
   { to: "/kalender-festival", label: "Kalender Festival BWI", icon: CalendarDays },
   { to: "/sensor-iot", label: "Sensor IoT", icon: Cpu },
   { to: "/mood-wellbeing", label: "Mood & Wellbeing", icon: Smile },
+  { to: "/jejak-wangi", label: "Jejak Wangi", icon: Footprints },
   { to: "/geofencing", label: "Geofencing", icon: MapPin },
   { to: "/laporan", label: "Laporan & Analitik", icon: BarChart3 },
   { to: "/pengguna", label: "Pengguna", icon: Users },

@@ -136,7 +136,7 @@ function UserForm({ mode, user, me, onClose, onSaved }) {
   const toast = useToast();
   const edit = mode === "edit";
   const self = edit && user.id === me?.id;
-  const [f, setF] = useState({ name: user?.nama ?? "", email: user?.email ?? "", password: "", is_admin: user?.is_admin ?? false, is_active: user?.is_active ?? true });
+  const [f, setF] = useState({ name: user?.nama ?? "", email: user?.email ?? "", password: "", is_admin: user?.is_admin ?? false, is_active: user?.is_active ?? true, umkm_id: user?.umkm_id ?? "" });
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const set = (k) => (v) => setF((s) => ({ ...s, [k]: v }));
@@ -155,6 +155,9 @@ function UserForm({ mode, user, me, onClose, onSaved }) {
     try {
       const body = { name: f.name.trim(), email: f.email.trim(), is_admin: f.is_admin, is_active: f.is_active };
       if (f.password) body.password = f.password;
+      // Akun kasir UMKM: kosong = bukan kasir. Saat ubah, kirim null agar tautan lama bisa dicabut.
+      const umkm = String(f.umkm_id).trim();
+      if (umkm) body.umkm_id = Number(umkm); else if (edit) body.umkm_id = null;
       if (edit) await usersApi.update(user.id, body); else await usersApi.create(body);
       toast.success(edit ? "Pengguna diperbarui." : "Pengguna ditambahkan.");
       onSaved();
@@ -181,6 +184,9 @@ function UserForm({ mode, user, me, onClose, onSaved }) {
             <div className="h-11 flex items-center gap-3"><Toggle checked={f.is_active} onChange={set("is_active")} disabled={self} label="Status aktif" /><span className="text-sm text-brand-700">{f.is_active ? "Aktif" : "NonAktif"}</span></div>
           </Field>
         </div>
+        <Field label="ID UMKM (akun kasir)" error={errors.umkm_id} htmlFor="u-umkm" hint="Isi untuk menjadikan akun ini kasir UMKM tersebut (dapat membuat QR “membawa tempat sendiri”). Kosongkan bila bukan kasir.">
+          <Input id="u-umkm" inputMode="numeric" value={f.umkm_id} onChange={(e) => set("umkm_id")(e.target.value.replace(/\D/g, ""))} invalid={!!errors.umkm_id} placeholder="mis. 1" />
+        </Field>
         <button type="submit" className="hidden" />
       </form>
     </Modal>
