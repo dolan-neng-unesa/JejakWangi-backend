@@ -1,0 +1,65 @@
+
+
+# Dependencies
+/node_modules
+/vendor
+
+# Laravel
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+/storage/logs/*
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.testing.example
+
+# IDE
+/.idea
+/.vscode
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Composer
+composer.phar
+
+# NPM / Yarn / PNPM
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# PHPUnit / Testing
+.phpunit.cache
+.phpunit.result.cache
+/coverage
+
+# Laravel Pint
+.phpunit.cache
+
+# Docker
+docker-compose.override.yml
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Local development
+Homestead.json
+Homestead.yaml
+/.phpunit.cache
+/auth.json
