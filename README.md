@@ -62,3 +62,7 @@ dan pastikan file serta foldernya bisa ditulis oleh user web server.
 
 ## Figma Link 
 https://www.figma.com/design/MNV5DGRhN07Mosy57J71ot/jejak-wangi?node-id=16-715&t=etKgyPRCwnAplZk3-1
+
+
+## Flowchart Jejak wangi Figma Link
+https://www.figma.com/board/8zv6Mj1PGNH1sV0DiL1XwK/jejak-wangi-Flowchart?node-id=0-1&t=PABP7Q5QMjR69Lww-1
