@@ -6,7 +6,7 @@ os.environ['OPENCV_LOG_LEVEL'] = 'SILENT'
 import math
 import time
 import threading
-from collections import deque, Counter
+from collections import deque, Counter 
 
 import cv2
 import yt_dlp
