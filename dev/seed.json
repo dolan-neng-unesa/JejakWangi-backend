@@ -51,7 +51,8 @@
      -8.2175,
      114.3675
     ]
-   ]
+   ],
+   "sort_order": 1
   },
   {
    "id": 2,
@@ -87,7 +88,8 @@
    },
    "created_at": "2026-10-16 07:07:14",
    "updated_at": "2026-10-16 07:07:14",
-   "path": null
+   "path": null,
+   "sort_order": 3
   },
   {
    "id": 3,
@@ -123,7 +125,8 @@
    },
    "created_at": "2026-10-16 07:07:14",
    "updated_at": "2026-10-16 07:07:14",
-   "path": null
+   "path": null,
+   "sort_order": 4
   },
   {
    "id": 4,
@@ -159,7 +162,8 @@
    },
    "created_at": "2026-10-16 07:07:14",
    "updated_at": "2026-10-16 07:07:14",
-   "path": null
+   "path": null,
+   "sort_order": 5
   },
   {
    "id": 5,
@@ -195,7 +199,8 @@
    },
    "created_at": "2026-10-16 07:07:14",
    "updated_at": "2026-10-16 07:07:14",
-   "path": null
+   "path": null,
+   "sort_order": 6
   },
   {
    "id": 6,
@@ -231,7 +236,97 @@
    },
    "created_at": "2026-10-16 07:07:14",
    "updated_at": "2026-10-16 07:07:14",
-   "path": null
+   "path": null,
+   "sort_order": 7
+  },
+  {
+   "id": 7,
+   "green_space_id": null,
+   "short_name": "Corridor Pasar",
+   "formal_name": "Koridor Pasar Induk",
+   "route_label": "Pasar Induk Banyuwangi",
+   "desc": "Pasar Induk Banyuwangi",
+   "thumbnail": "images/koridor/thumb-pasar.png",
+   "hero_image": "images/koridor/hero-pasar.png",
+   "hijau_level": "agak_hijau",
+   "hijau_score": 4,
+   "umkm_count": 5,
+   "status": "rencana",
+   "sort_order": 2,
+   "distance_meter": 450,
+   "estimate_minutes": 7,
+   "shade_score": 60,
+   "condition_title": "Kondisi Koridor Terpilih",
+   "condition_desc": "Koridor pasar tradisional yang ramai bongkar muat pada pagi hari, dengan deretan pedagang kuliner dan pohon peneduh di sepanjang jalur.",
+   "highlights": {
+    "kunjungan": [
+     {
+      "icon": "footprints",
+      "title": "Parkir sekali, jalan 450 m",
+      "value": "Hemat 120 g CO₂",
+      "note": "Setara ±Rp500",
+      "sdg": "SDG 13"
+     },
+     {
+      "icon": "bag",
+      "title": "Bawa tas sendiri di 2 lapak",
+      "value": "2 kantong plastik berkurang",
+      "note": "Belanja lebih ramah bumi",
+      "sdg": "SDG 12"
+     },
+     {
+      "icon": "wind",
+      "title": "Udara saat kamu jalan",
+      "value": "ISPU 45 · Baik",
+      "note": "Jalur 3°C lebih sejuk",
+      "sdg": "SDG 3 & 11"
+     }
+    ],
+    "eco_coach": "Besok coba datang sebelum pukul 07.00, pasar belum padat kendaraan bongkar muat.",
+    "dampak": {
+     "judul": "Dampak bersama kita",
+     "periode": "Bulan ini",
+     "komunitas": "Warga Sritanjung–Blambangan",
+     "co2_kg": 85,
+     "kantong_plastik": 1240,
+     "kompos": "300 kg sampah sayur pasar jadi kompos untuk 40 pohon taman."
+    },
+    "pesan": "Kontribusi kecil kita, perubahan besar bersama. Terima kasih sudah ikut menjaga kawasan."
+   },
+   "sensor_snapshot": {
+    "pm25": 22,
+    "pm25_status": "Sehat",
+    "suhu": 28.9,
+    "suhu_status": "Hangat",
+    "kelembaban": 62,
+    "kelembaban_status": "Nyaman",
+    "kebisingan": 66,
+    "kebisingan_status": "Ramai",
+    "uv_index": 4.8,
+    "uv_status": "Sedang",
+    "sensor_status": "online",
+    "recorded_at": "2026-10-16T07:07:14+00:00"
+   },
+   "created_at": "2026-10-16 07:07:14",
+   "updated_at": "2026-10-16 07:07:14",
+   "path": [
+    [
+     -8.2138,
+     114.3718
+    ],
+    [
+     -8.2145,
+     114.3731
+    ],
+    [
+     -8.2152,
+     114.3742
+    ],
+    [
+     -8.2158,
+     114.3752
+    ]
+   ]
   }
  ],
  "green_spaces": [

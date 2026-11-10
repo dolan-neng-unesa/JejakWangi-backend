@@ -63,7 +63,7 @@ for (let d = 0; d < 30; d++) for (let i = 0; i < 6 + Math.floor(rand() * 10); i+
 // ---- helpers ----
 const send = (res, code, body, headers = {}) => { res.writeHead(code, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*", ...headers }); res.end(JSON.stringify(body)); };
 const wrap = (data) => ({ data });
-const koridorRes = (k) => ({ id: k.id, green_space_id: k.green_space_id, short_name: k.short_name, formal_name: k.formal_name, route_label: k.route_label, desc: k.desc, thumbnail: null, hero_image: null, hijau_level: k.hijau_level, hijau_score: k.hijau_score, umkm_count: k.umkm_count, status: k.status, distance_meter: k.distance_meter, estimate_minutes: k.estimate_minutes, path: k.path, shade_score: k.shade_score, condition_title: k.condition_title, condition_desc: k.condition_desc, sensor: k.sensor_snapshot });
+const koridorRes = (k) => ({ id: k.id, green_space_id: k.green_space_id, short_name: k.short_name, formal_name: k.formal_name, route_label: k.route_label, desc: k.desc, thumbnail: null, hero_image: null, hijau_level: k.hijau_level, hijau_score: k.hijau_score, umkm_count: k.umkm_count, status: k.status, sort_order: k.sort_order ?? k.id, distance_meter: k.distance_meter, estimate_minutes: k.estimate_minutes, path: k.path, shade_score: k.shade_score, highlights: k.highlights ?? null, condition_title: k.condition_title, condition_desc: k.condition_desc, sensor: k.sensor_snapshot });
 const festRes = (f) => ({ id: f.id, bfest_name: f.name, location_type: f.location_type, location_name: f.location_name, category: f.category, address: f.address, date: f.event_date, start_time: f.start_time, end_time: f.end_time, description: f.description, image: f.image_url, is_active: f.is_active });
 const zoneRes = (z) => ({ id: z.id, name: z.name, latitude: z.latitude, longitude: z.longitude, radius_meter: z.radius_meter, is_active: z.is_active, soundscape_id: z.soundscape_id, welcome_title: z.welcome_title, welcome_desc: z.welcome_desc, koridor_id: z.koridor_id, background_image: null });
 const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -92,7 +92,7 @@ const server = http.createServer(async (req, res) => {
   let mt;
 
   // --- publik ---
-  if (m === "GET" && p === "/koridors") return send(res, 200, wrap(seed.koridors.map(koridorRes)));
+  if (m === "GET" && p === "/koridors") return send(res, 200, wrap([...seed.koridors].sort((a, b) => (a.sort_order ?? a.id) - (b.sort_order ?? b.id) || a.id - b.id).map(koridorRes)));
   if (m === "GET" && p === "/green-spaces") return send(res, 200, wrap(seed.green_spaces.map((g) => ({ id: g.id, name: g.name, location_type: g.location_type, description: g.description, latitude: g.latitude, longitude: g.longitude, address: g.address, shade_score: g.shade_score, is_active: !!g.is_active }))));
   if (m === "GET" && p === "/soundscapes") return send(res, 200, wrap(seed.soundscapes.map((s) => ({ id: s.id, title: s.title, category: s.category, duration: s.duration, audio_url: s.audio_url }))));
   if (m === "GET" && p === "/umkm") return send(res, 200, { data: [], meta: {} });
