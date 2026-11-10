@@ -15,7 +15,7 @@ class KoridorController extends Controller
 {
     public function index()
     {
-        $koridors = KoridorModel::orderBy('id')->get();
+        $koridors = KoridorModel::orderBy('sort_order')->orderBy('id')->get();
 
         return KoridorResource::collection($koridors);
     }

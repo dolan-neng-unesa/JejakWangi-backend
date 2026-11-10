@@ -17,6 +17,7 @@ class KoridorModel extends Model
         'status', 'distance_meter', 'estimate_minutes', 'path', 'shade_score',
         'condition_title', 'condition_desc', 'sensor_snapshot',
         'oxygen_kg_day', 'co2_reduced_kg_day', 'carbon_inputs',
+        'sort_order', 'highlights',
     ];
 
     protected $casts = [
@@ -30,6 +31,8 @@ class KoridorModel extends Model
         'sensor_snapshot' => 'array',
         'path' => 'array',
         'carbon_inputs' => 'array',
+        'sort_order' => 'integer',
+        'highlights' => 'array',
     ];
 
     public function greenSpace()

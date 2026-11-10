@@ -174,13 +174,62 @@ class KoridorSeeder extends Seeder
                 'condition_desc' => 'Koridor pesisir dengan angin laut sejuk. Vegetasi peneduh sedang, cocok untuk jalan sore.',
                 'sensor' => ['pm25' => 20, 'pm25_status' => 'Sehat', 'suhu' => 28.6, 'suhu_status' => 'Hangat', 'kelembaban' => 70, 'kelembaban_status' => 'Lembab', 'kebisingan' => 58, 'kebisingan_status' => 'Tenang', 'uv_index' => 5.1, 'uv_status' => 'Sedang', 'sensor_status' => 'online'],
             ],
+            [
+                'id' => 7,
+                'green_space_id' => null,
+                'short_name' => 'Corridor Pasar',
+                'formal_name' => 'Koridor Pasar Induk',
+                'route_label' => 'Pasar Induk Banyuwangi',
+                'desc' => 'Pasar Induk Banyuwangi',
+                'thumbnail' => 'images/koridor/thumb-pasar.png',
+                'hero_image' => 'images/koridor/hero-pasar.png',
+                'hijau_level' => 'agak_hijau',
+                'hijau_score' => 4,
+                'umkm_count' => 5,
+                'status' => 'rencana',
+                'distance_meter' => 450,
+                'estimate_minutes' => 7,
+                // koordinat perkiraan, ganti dengan hasil survei / gambar di mode edit peta (/map?edit=1).
+                'path' => [[-8.2138, 114.3718], [-8.2145, 114.3731], [-8.2152, 114.3742], [-8.2158, 114.3752]],
+                'shade_score' => 60,
+                'oxygen_kg_day' => 6.0,
+                'co2_reduced_kg_day' => 8.2,
+                // Masukan neraca karbon (CONTOH, ganti dengan hasil survei). FE menghitung ulang oxygen/co2 dari sini.
+                'carbon_inputs' => ['pohon' => [['jenis' => 'mahoni', 'jumlah' => 10], ['jenis' => 'angsana', 'jumlah' => 8]], 'kendaraanPerHari' => ['motor' => 2600, 'mobil' => 420, 'truk' => 45], 'toko' => [['nama' => 'Kios Kuliner', 'unitAC' => 1, 'kWPerUnit' => 0.75, 'jamOperasi' => 10, 'faktorBeban' => 0.6]], 'sumberData' => ['kendaraan' => 'ILUSTRASI', 'pohon' => 'ILUSTRASI', 'ac' => 'ILUSTRASI']],
+                'condition_title' => 'Kondisi Koridor Terpilih',
+                'condition_desc' => 'Koridor pasar tradisional yang ramai bongkar muat pada pagi hari, dengan deretan pedagang kuliner dan pohon peneduh di sepanjang jalur.',
+                // Konten halaman detail sesuai mockup "Koridor Pasar Induk". Semua angka ILUSTRASI — ganti dengan data lapangan.
+                'highlights' => [
+                    'kunjungan' => [
+                        ['icon' => 'footprints', 'title' => 'Parkir sekali, jalan 450 m', 'value' => 'Hemat 120 g CO₂', 'note' => 'Setara ±Rp500', 'sdg' => 'SDG 13'],
+                        ['icon' => 'bag', 'title' => 'Bawa tas sendiri di 2 lapak', 'value' => '2 kantong plastik berkurang', 'note' => 'Belanja lebih ramah bumi', 'sdg' => 'SDG 12'],
+                        ['icon' => 'wind', 'title' => 'Udara saat kamu jalan', 'value' => 'ISPU 45 · Baik', 'note' => 'Jalur 3°C lebih sejuk', 'sdg' => 'SDG 3 & 11'],
+                    ],
+                    'eco_coach' => 'Besok coba datang sebelum pukul 07.00, pasar belum padat kendaraan bongkar muat.',
+                    'dampak' => [
+                        'judul' => 'Dampak bersama kita',
+                        'periode' => 'Bulan ini',
+                        'komunitas' => 'Warga Sritanjung–Blambangan',
+                        'co2_kg' => 85,
+                        'kantong_plastik' => 1240,
+                        'kompos' => '300 kg sampah sayur pasar jadi kompos untuk 40 pohon taman.',
+                    ],
+                    'pesan' => 'Kontribusi kecil kita, perubahan besar bersama. Terima kasih sudah ikut menjaga kawasan.',
+                ],
+                'sensor' => ['pm25' => 22, 'pm25_status' => 'Sehat', 'suhu' => 28.9, 'suhu_status' => 'Hangat', 'kelembaban' => 62, 'kelembaban_status' => 'Nyaman', 'kebisingan' => 66, 'kebisingan_status' => 'Ramai', 'uv_index' => 4.8, 'uv_status' => 'Sedang', 'sensor_status' => 'online'],
+            ],
         ];
+
+        // Urutan tampil di daftar (id = nomor wilayah ESP32, jadi tidak digeser): Pasar Induk di posisi 2.
+        $urutan = [1 => 1, 7 => 2, 2 => 3, 3 => 4, 4 => 5, 5 => 6, 6 => 7];
 
         foreach ($rows as $row) {
             $sensor = $row['sensor'];
             $sensor['recorded_at'] = now()->toIso8601String();
             unset($row['sensor']);
             $row['path'] = isset($row['path']) ? json_encode($row['path']) : null;
+            $row['sort_order'] = $urutan[$row['id']] ?? $row['id'];
+            $row['highlights'] = isset($row['highlights']) ? json_encode($row['highlights'], JSON_UNESCAPED_UNICODE) : null;
             $row['carbon_inputs'] = isset($row['carbon_inputs']) ? json_encode($row['carbon_inputs']) : null;
             $row['sensor_snapshot'] = json_encode($sensor);
             $row['created_at'] = now();

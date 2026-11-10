@@ -28,6 +28,8 @@ class KoridorResource extends JsonResource
             'hijau_score' => (int) $this->hijau_score,
             'umkm_count' => (int) $this->umkm_count,
             'status' => $this->status,
+            // Urutan tampil di daftar koridor (terpisah dari id; lihat migration add_sort_order_and_highlights).
+            'sort_order' => (int) $this->sort_order,
             'distance_meter' => $this->distance_meter,
             'estimate_minutes' => $this->estimate_minutes,
             // Jalur untuk peta: [[lat, lng], ...] atau null bila belum ada datanya.
@@ -38,6 +40,8 @@ class KoridorResource extends JsonResource
             'co2_reduced_kg_day' => $this->co2_reduced_kg_day !== null ? (float) $this->co2_reduced_kg_day : null,
             // Masukan neraca karbon (pohon, kendaraan, AC toko); FE menghitung ulang oxygen/co2 darinya.
             'carbon_inputs' => $this->carbon_inputs,
+            // Konten opsional halaman detail (kunjungan hari ini, Eco-Coach, dampak bersama); null = tampilan standar.
+            'highlights' => $this->highlights,
             'condition_title' => $this->condition_title,
             'condition_desc' => $this->condition_desc,
             // Snapshot statis (baseline) — untuk suhu & kualitas udara, FE

@@ -71,6 +71,48 @@ class KoridorApiTest extends TestCase
         $this->getJson("/api/koridors/{$koridor->id}")->assertJsonPath('data.path', null);
     }
 
+    public function test_daftar_koridor_diurutkan_berdasarkan_sort_order_bukan_id(): void
+    {
+        // Pasar Induk dibuat terakhir (id terbesar) tapi tampil di posisi 2 lewat sort_order.
+        KoridorModel::create(['short_name' => 'RTH Sritanjung', 'formal_name' => 'Koridor 1', 'hijau_level' => 'paling_hijau', 'hijau_score' => 5, 'status' => 'pilot', 'sort_order' => 1]);
+        KoridorModel::create(['short_name' => 'Corridor 1 Kalilo', 'formal_name' => 'Koridor 2', 'hijau_level' => 'agak_hijau', 'hijau_score' => 4, 'status' => 'rencana', 'sort_order' => 3]);
+        KoridorModel::create(['short_name' => 'Corridor Pasar', 'formal_name' => 'Koridor Pasar Induk', 'hijau_level' => 'agak_hijau', 'hijau_score' => 4, 'status' => 'rencana', 'sort_order' => 2]);
+
+        $this->getJson('/api/koridors')
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.short_name', 'RTH Sritanjung')
+            ->assertJsonPath('data.1.short_name', 'Corridor Pasar')
+            ->assertJsonPath('data.2.short_name', 'Corridor 1 Kalilo');
+    }
+
+    public function test_koridor_mengembalikan_highlights_untuk_halaman_detail(): void
+    {
+        $koridor = KoridorModel::create([
+            'short_name' => 'Corridor Pasar', 'formal_name' => 'Koridor Pasar Induk',
+            'hijau_level' => 'agak_hijau', 'hijau_score' => 4, 'status' => 'rencana',
+            'highlights' => [
+                'kunjungan' => [['icon' => 'footprints', 'title' => 'Parkir sekali, jalan 450 m', 'value' => 'Hemat 120 g CO₂', 'note' => 'Setara ±Rp500', 'sdg' => 'SDG 13']],
+                'eco_coach' => 'Besok coba datang sebelum pukul 07.00.',
+                'dampak' => ['co2_kg' => 85, 'kantong_plastik' => 1240],
+            ],
+        ]);
+
+        $this->getJson("/api/koridors/{$koridor->id}")
+            ->assertStatus(200)
+            ->assertJsonPath('data.highlights.kunjungan.0.sdg', 'SDG 13')
+            ->assertJsonPath('data.highlights.dampak.kantong_plastik', 1240);
+    }
+
+    public function test_koridor_tanpa_highlights_mengembalikan_null(): void
+    {
+        $koridor = KoridorModel::create([
+            'short_name' => 'Kalilo', 'formal_name' => 'Koridor 2: Kalilo',
+            'hijau_level' => 'agak_hijau', 'hijau_score' => 4, 'status' => 'rencana',
+        ]);
+
+        $this->getJson("/api/koridors/{$koridor->id}")->assertJsonPath('data.highlights', null);
+    }
+
     public function test_koridor_yang_tidak_ada_mengembalikan_404(): void
     {
         $this->getJson('/api/koridors/999')->assertStatus(404);
