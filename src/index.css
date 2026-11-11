@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+
+/* =========================================================
+   JEJAK WANGI Admin — Design Tokens
+   Diambil langsung dari mockup "JEJAK WANGI UI Design" (dashboard admin).
+   Hijau utama sama dengan jejak-wangi-app (canopy-700 = #3f6e45).
+   ========================================================= */
+@theme {
+  --font-sans: "Poppins", system-ui, sans-serif;
+
+  --color-brand-900: #2b4d30;
+  --color-brand-800: #355d3b;
+  --color-brand-700: #3f6e45;   /* sidebar, tombol utama, judul */
+  --color-brand-600: #47744c;
+  --color-brand-500: #57805c;
+  --color-brand-400: #8fa38f;
+  --color-brand-300: #b9c8ba;
+  --color-brand-200: #e1e8e3;   /* border kartu */
+  --color-brand-100: #e8f0ea;   /* chip */
+  --color-brand-50:  #f0f6f1;   /* tint hijau */
+
+  --color-canvas: #f4f7f4;      /* latar halaman */
+  --color-muted: #647664;       /* teks sekunder */
+  --color-muted-2: #7b8a7b;
+
+  --color-ok: #2e7d32;
+  --color-ok-bg: #e8f3e8;
+  --color-warn: #ed6c02;
+  --color-warn-bg: #fef1e4;
+  --color-info: #0288d1;
+  --color-info-2: #277cb1;
+  --color-info-bg: #e6f4fb;
+  --color-danger: #d32f2f;
+  --color-danger-bg: #fdeeee;
+}
+
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-brand-700);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+:focus-visible { outline: 2px solid var(--color-info); outline-offset: 2px; border-radius: 6px; }
+
+/* Scrollbar tipis */
+* { scrollbar-width: thin; scrollbar-color: #c3d0c4 transparent; }
+
+/* Animasi halus untuk modal & toast */
+@keyframes svg-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes svg-pop { from { opacity: 0; transform: translateY(10px) scale(.98) } to { opacity: 1; transform: none } }
+@keyframes svg-slide { from { opacity: 0; transform: translateX(24px) } to { opacity: 1; transform: none } }
+.anim-fade { animation: svg-fade .18s ease-out both }
+.anim-pop { animation: svg-pop .22s ease-out both }
+.anim-slide { animation: svg-slide .22s ease-out both }
+
+@keyframes svg-shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+.skeleton {
+  background: linear-gradient(90deg, #e9eee9 25%, #f4f7f4 50%, #e9eee9 75%);
+  background-size: 200% 100%;
+  animation: svg-shimmer 1.4s infinite linear;
+  border-radius: 8px;
+}
+
+/* Leaflet: label pin seperti di mockup */
+.pin-label {
+  white-space: nowrap; color: #fff; font-weight: 600; font-size: 12px;
+  padding: 4px 10px; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  transform: translate(-50%, -100%); position: absolute; left: 0; top: 0;
+}
+.pin-label::after {
+  content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px;
+  background: inherit; transform: translateX(-50%) rotate(45deg);
+}
+.leaflet-container { font-family: var(--font-sans); background: #cfe3ee; }
+
+/* Cetak laporan */
+@media print {
+  aside, .no-print { display: none !important; }
+  main { padding: 0 !important; overflow: visible !important; }
+  body { background: #fff; }
+}

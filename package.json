@@ -1,0 +1,30 @@
+{
+  "name": "jejak-wangi-admin",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "mock": "node dev/mock-api.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource/poppins": "^5.2.7",
+    "@tailwindcss/vite": "^4.3.3",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.4",
+    "jsdom": "^31.0.0",
+    "vite": "^8.2.0",
+    "vitest": "^5.1.0"
+  }
+}
