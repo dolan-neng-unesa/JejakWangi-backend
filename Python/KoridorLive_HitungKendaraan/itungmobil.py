@@ -6,7 +6,8 @@ os.environ['OPENCV_LOG_LEVEL'] = 'SILENT'
 import math
 import time
 import threading
-from collections import deque, Counter 
+from datetime import datetime, timedelta
+from collections import deque, Counter
 
 import cv2
 import yt_dlp
@@ -36,6 +37,10 @@ MIN_HITS = 3
 MOVE_MIN_PX = 25
 MOVE_FRAC = 0.5
 MAX_AREA_FRAC = 0.10
+
+# [BARU] pengaturan tanggal-jam
+TIME_FORMAT = '%d-%m-%Y %H:%M:%S'
+TIME_OFFSET_HOURS = 0
 
 TARGET_CLASSES = [2, 3, 5, 7]
 CLASS_INFO = {2: 'Mobil', 3: 'Motor', 5: 'Truk', 7: 'Truk'}
@@ -74,6 +79,7 @@ class StreamBuffer:
         self.max_height = max_height
         self.buffer_frames = buffer_frames
         self.buffer = deque()
+        self.times = {}
         self.lock = threading.Lock()
         self.cap = None
         self.fps = 30.0
@@ -131,11 +137,21 @@ class StreamBuffer:
             with self.lock:
                 self.counter += 1
                 self.buffer.append((self.counter, frame))
+                self.times[self.counter] = datetime.now()
 
     def get(self):
         """Ambil frame tertua (untuk ditampilkan). Mengembalikan (nomor, frame) atau None."""
         with self.lock:
-            return self.buffer.popleft() if self.buffer else None
+            if not self.buffer:
+                return None
+            item = self.buffer.popleft()
+            self.times.pop(item[0] - 1, None)
+            return item
+
+    def time_of(self, idx):
+        """Waktu frame bernomor idx diterima (datetime), atau waktu sekarang jika tidak ada."""
+        with self.lock:
+            return self.times.get(idx) or datetime.now()
 
     def newest(self):
         """Lihat frame terbaru (untuk dideteksi) tanpa mengeluarkannya dari buffer."""
@@ -369,6 +385,18 @@ def interpolate(p0, p1, d):
     return out, (p1[2] if a >= 0.5 else p0[2])
 
 
+def draw_datetime(frame, dt):
+    """Tulis tanggal-jam di pojok kanan atas dengan latar gelap agar terbaca."""
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    text = (dt + timedelta(hours=TIME_OFFSET_HOURS)).strftime(TIME_FORMAT)
+    scale, thick = 0.7, 2
+    (tw, th), base = cv2.getTextSize(text, font, scale, thick)
+    x = frame.shape[1] - tw - 15
+    y = 15 + th
+    cv2.rectangle(frame, (x - 8, y - th - 8), (x + tw + 8, y + base + 6), (0, 0, 0), -1)
+    cv2.putText(frame, text, (x, y), font, scale, (255, 255, 255), thick, cv2.LINE_AA)
+
+
 def draw_overlay(frame, dets, counts, infer_fps, buf_size, near_min_px):
     font = cv2.FONT_HERSHEY_SIMPLEX
     h, w = frame.shape[:2]
@@ -440,6 +468,7 @@ def main():
 
             disp = last.copy()
             draw_overlay(disp, dets, counts, detector.infer_fps, stream.size(), near_min_px)
+            draw_datetime(disp, stream.time_of(last_idx))
             cv2.imshow(WINDOW, disp)
 
             if cv2.waitKey(1) & 0xFF in (27, ord('q')):

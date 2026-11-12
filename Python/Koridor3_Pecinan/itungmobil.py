@@ -1,6 +1,9 @@
+import os
 import math
+import struct
 import cv2
 import torch
+from datetime import datetime, timedelta, timezone
 from collections import Counter, defaultdict
 from ultralytics import YOLO
 
@@ -16,6 +19,72 @@ MIN_BOX_W = 25
 IGNORE_WIDE = 0.35
 MAX_GAP = 45
 MATCH_DIST = 1.0
+
+TIME_SOURCE = 'metadata'
+TIME_OFFSET_HOURS = 0
+TIME_FORMAT = '%d-%m-%Y %H:%M:%S'
+
+def read_mp4_creation_time(path):
+    """Baca creation_time dari atom 'mvhd' di dalam 'moov' (tanpa library tambahan).
+    Mengembalikan datetime UTC, atau None jika tidak ada / kosong."""
+    def find_box(f, start, end, target):
+        pos = start
+        while pos + 8 <= end:
+            f.seek(pos)
+            size, typ = struct.unpack('>I4s', f.read(8))
+            hdr = 8
+            if size == 1:
+                size = struct.unpack('>Q', f.read(8))[0]
+                hdr = 16
+            elif size == 0:
+                size = end - pos
+            if size < hdr:
+                break
+            if typ == target:
+                return pos + hdr, pos + size
+            pos += size
+        return None
+
+    try:
+        with open(path, 'rb') as f:
+            end = os.path.getsize(path)
+            moov = find_box(f, 0, end, b'moov')
+            if not moov:
+                return None
+            mvhd = find_box(f, moov[0], moov[1], b'mvhd')
+            if not mvhd:
+                return None
+            f.seek(mvhd[0])
+            version = f.read(1)[0]
+            f.read(3)  # flags
+            if version == 1:
+                ct = struct.unpack('>Q', f.read(8))[0]
+            else:
+                ct = struct.unpack('>I', f.read(4))[0]
+        if ct == 0:
+            return None
+        return datetime(1904, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=ct)
+    except Exception as e:
+        print('Gagal membaca metadata MP4:', e)
+        return None
+
+
+def get_video_start_time(path):
+    dt = None
+    if TIME_SOURCE == 'metadata':
+        dt = read_mp4_creation_time(path)
+        if dt is not None:
+            dt = dt.astimezone()   # ubah ke zona waktu komputer (mis. WIB)
+            print('Waktu dari metadata MP4:', dt.strftime(TIME_FORMAT))
+        else:
+            print('Metadata waktu tidak ada, memakai waktu modifikasi file.')
+    if dt is None:
+        dt = datetime.fromtimestamp(os.path.getmtime(path)).astimezone()
+        print('Waktu dari properti file:', dt.strftime(TIME_FORMAT))
+    return dt + timedelta(hours=TIME_OFFSET_HOURS)
+
+
+start_time = get_video_start_time(VIDEO_PATH)
 
 TRACKER_YAML = 'botsort_custom.yaml'
 with open(TRACKER_YAML, 'w') as f:
@@ -57,6 +126,16 @@ WINDOW = 'Deteksi Kendaraan - YOLOv8'
 cv2.namedWindow(WINDOW, cv2.WINDOW_NORMAL)
 cv2.resizeWindow(WINDOW, 1280, 720)
 font = cv2.FONT_HERSHEY_SIMPLEX
+
+
+def draw_datetime(frame, text):
+    """Tulis tanggal-jam di pojok kanan atas dengan latar gelap agar terbaca."""
+    scale, thick = 0.7, 2
+    (tw, th), base = cv2.getTextSize(text, font, scale, thick)
+    x = frame.shape[1] - tw - 15
+    y = 15 + th
+    cv2.rectangle(frame, (x - 8, y - th - 8), (x + tw + 8, y + base + 6), (0, 0, 0), -1)
+    cv2.putText(frame, text, (x, y), font, scale, (255, 255, 255), thick, cv2.LINE_AA)
 
 
 def remove_nested(dets):
@@ -113,6 +192,9 @@ while cap.isOpened():
         break
     frame_no += 1
 
+    pos_ms = cap.get(cv2.CAP_PROP_POS_MSEC)
+    now = start_time + timedelta(milliseconds=pos_ms)
+
     r = model.track(
         frame[roi_y:], persist=True, tracker=TRACKER_YAML,
         conf=CONF, iou=IOU, imgsz=IMG_SIZE,
@@ -168,6 +250,8 @@ while cap.isOpened():
     cv2.putText(frame, f"Jumlah Motor: {final.count('motor')}", (15, 75), font, 0.7, COLOR['motor'], 2, cv2.LINE_AA)
     cv2.putText(frame, f"Jumlah Truk: {final.count('truk')}", (15, 110), font, 0.7, COLOR['truk'], 2, cv2.LINE_AA)
     cv2.putText(frame, f"Terdeteksi di layar: {shown}", (15, 145), font, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+
+    draw_datetime(frame, now.strftime(TIME_FORMAT))
 
     cv2.imshow(WINDOW, frame)
     if cv2.waitKey(1) & 0xff == 27:
