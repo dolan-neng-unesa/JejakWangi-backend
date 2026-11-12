@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 // Menggantikan koleksi Firestore `geofences` (lihat geofenceService.js di
-// svarga-app). Pendeteksian zona tetap dihitung client-side (Haversine,
+// jejak-wangi-app). Pendeteksian zona tetap dihitung client-side (Haversine,
 // Batasan 4.1 proposal) — endpoint ini hanya menyuplai daftar zona aktif,
 // bukan melakukan pendeteksian di server.
 return new class extends Migration

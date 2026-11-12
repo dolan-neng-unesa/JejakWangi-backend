@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Menggantikan koleksi Firestore `mood_logs` + `mood_aggregates` (lihat
- * moodService.js di svarga-app). Data mood tetap agregat/anonim di
+ * moodService.js di jejak-wangi-app). Data mood tetap agregat/anonim di
  * response (bukan tugas endpoint ini menyingkap identitas pengguna),
  * sesuai Batasan 4.1 proposal — mood_score individual memang tersimpan di
  * DB untuk keperluan agregasi, tapi endpoint publik hanya membuka
@@ -51,7 +51,7 @@ class MoodLogController extends Controller
     {
         $validator = Validator::make($request->all(), [
             // Nullable: dashboard admin butuh agregat se-kota (semua green space),
-            // sedangkan MoodHistoryPage.jsx di svarga-app mengirim satu green_space_id.
+            // sedangkan MoodHistoryPage.jsx di jejak-wangi-app mengirim satu green_space_id.
             'green_space_id' => ['nullable', 'integer', 'min:1'],
             'days' => ['nullable', 'integer', 'min:1', 'max:90'],
         ]);

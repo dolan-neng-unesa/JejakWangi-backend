@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\GreenSpaceModel;
 use Illuminate\Database\Seeder;
 
-// Data disamakan dengan greenSpaces[] di svarga-app/src/data/mockGreenSpaces.js.
+// Data disamakan dengan greenSpaces[] di jejak-wangi-app/src/data/mockGreenSpaces.js.
 class GreenSpaceSeeder extends Seeder
 {
     public function run(): void

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\UmkmModel;
 use Illuminate\Database\Seeder;
 
-// Data disamakan persis dengan src/data/mockContent.js di svarga-app,
+// Data disamakan persis dengan src/data/mockContent.js di jejak-wangi-app,
 // supaya tampilan tidak berubah saat React pindah dari data mock ke API ini.
 class UmkmSeeder extends Seeder
 {

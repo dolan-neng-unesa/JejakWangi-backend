@@ -6,7 +6,7 @@ use App\Models\KoridorModel;
 use Illuminate\Database\Seeder;
 
 // Data disamakan persis dengan koridors[] di
-// svarga-app/src/data/mockGreenSpaces.js — termasuk sensor_snapshot, supaya
+// jejak-wangi-app/src/data/mockGreenSpaces.js — termasuk sensor_snapshot, supaya
 // perilaku FE (termasuk kartu "Kondisi Lingkungan" di HomePage) tidak
 // berubah saat berpindah dari mock/Firestore ke API ini. Gambar (thumbnail/
 // hero_image) menunjuk ke public/images/koridor/ (lihat KoridorResource

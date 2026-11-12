@@ -32,10 +32,10 @@ class AdminCrudTest extends TestCase
     public function test_admin_bisa_membuat_pengguna_baru_termasuk_admin(): void
     {
         $this->asAdmin()->postJson('/api/admin/users', [
-            'name' => 'Staff Baru', 'email' => 'staff@svarga.test', 'password' => 'rahasia123', 'is_admin' => true,
+            'name' => 'Staff Baru', 'email' => 'staff@jejakwangi.test', 'password' => 'rahasia123', 'is_admin' => true,
         ])->assertStatus(201)->assertJsonPath('data.peran', 'Admin');
 
-        $this->assertDatabaseHas('users', ['email' => 'staff@svarga.test', 'is_admin' => true]);
+        $this->assertDatabaseHas('users', ['email' => 'staff@jejakwangi.test', 'is_admin' => true]);
     }
 
     public function test_admin_bisa_mengedit_dan_menonaktifkan_pengguna(): void
@@ -65,9 +65,9 @@ class AdminCrudTest extends TestCase
 
     public function test_email_duplikat_ditolak_saat_membuat_pengguna(): void
     {
-        UserModel::factory()->create(['email' => 'dipakai@svarga.test']);
+        UserModel::factory()->create(['email' => 'dipakai@jejakwangi.test']);
 
-        $this->asAdmin()->postJson('/api/admin/users', ['name' => 'X', 'email' => 'dipakai@svarga.test', 'password' => 'rahasia123'])
+        $this->asAdmin()->postJson('/api/admin/users', ['name' => 'X', 'email' => 'dipakai@jejakwangi.test', 'password' => 'rahasia123'])
             ->assertStatus(422);
     }
 

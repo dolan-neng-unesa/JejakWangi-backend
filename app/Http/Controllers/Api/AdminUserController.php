@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
 
 /**
- * Endpoint khusus dashboard admin (svarga-admin) — menggantikan
+ * Endpoint khusus dashboard admin (jejak-wangi-admin) — menggantikan
  * userService.js + dashboardService.js sisi Prisma/Supabase. Semua route
  * di sini di-guard middleware ['auth:sanctum', 'admin'] (lihat routes/api.php).
  */

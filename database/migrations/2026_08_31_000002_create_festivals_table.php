@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// SVARGA Backend (Laravel) — tabel Festival (BWI Fest / Kalender Festival).
+// JEJAK WANGI Backend (Laravel) — tabel Festival (BWI Fest / Kalender Festival).
 return new class extends Migration
 {
     public function up(): void

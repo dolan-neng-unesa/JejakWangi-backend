@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\FestivalModel;
 use Illuminate\Database\Seeder;
 
-// Data disamakan persis dengan src/data/mockContent.js (bfestEvents) di svarga-app.
+// Data disamakan persis dengan src/data/mockContent.js (bfestEvents) di jejak-wangi-app.
 class FestivalSeeder extends Seeder
 {
     public function run(): void

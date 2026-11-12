@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 // Beda dari UserResource biasa (dipakai response login/register) —
-// resource ini khusus tabel "Daftar Akun Pengguna Svarga" di dashboard
+// resource ini khusus tabel "Daftar Akun Pengguna Jejak Wangi" di dashboard
 // admin, field-nya disesuaikan dengan tampilan tabel itu.
 class AdminUserResource extends JsonResource
 {

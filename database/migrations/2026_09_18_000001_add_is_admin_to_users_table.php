@@ -4,9 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// Login admin dashboard (svarga-admin) sebelumnya lewat Prisma/Supabase
+// Login admin dashboard (jejak-wangi-admin) sebelumnya lewat Prisma/Supabase
 // terpisah. Dipindah ke Laravel Sanctum (tabel `users` yang sama dengan
-// svarga-app) supaya tidak ada lagi ketergantungan ke Supabase — cukup satu
+// jejak-wangi-app) supaya tidak ada lagi ketergantungan ke Supabase — cukup satu
 // kolom untuk membedakan admin dari pengguna biasa.
 return new class extends Migration
 {

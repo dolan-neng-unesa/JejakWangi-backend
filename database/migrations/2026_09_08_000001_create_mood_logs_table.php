@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 // Menggantikan koleksi Firestore `mood_logs` (lihat TODO lama di
-// svarga-app/src/services/moodService.js soal Cloud Function agregat —
+// jejak-wangi-app/src/services/moodService.js soal Cloud Function agregat —
 // dengan tabel relasional ini agregasi bisa dihitung langsung lewat query
 // SQL biasa di MoodLogController@summary, tanpa perlu Cloud Function.
 return new class extends Migration

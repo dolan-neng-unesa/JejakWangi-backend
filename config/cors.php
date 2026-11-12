@@ -1,10 +1,10 @@
 <?php
 
-// SVARGA — konfigurasi CORS supaya browser (svarga-app di :5173, svarga-admin di :5174,
+// JEJAK WANGI — konfigurasi CORS supaya browser (jejak-wangi-app di :5173, jejak-wangi-admin di :5174,
 // atau domain produksi) diizinkan memanggil API Laravel ini.
 //
 // Produksi: isi CORS_ALLOWED_ORIGINS di .env dengan domain asli, dipisah koma, mis.
-//   CORS_ALLOWED_ORIGINS=https://app.svarga.id,https://admin.svarga.id
+//   CORS_ALLOWED_ORIGINS=https://app.jejakwangi.id,https://admin.jejakwangi.id
 // Pola LAN (192.168.x.x / 10.x.x.x) HANYA aktif saat APP_ENV=local, supaya server
 // produksi tidak menerima origin dari jaringan privat sembarang.
 

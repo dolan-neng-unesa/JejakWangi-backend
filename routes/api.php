@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminJejakWangiController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\ByoController;
 use App\Http\Controllers\Api\ChargerStationController;
+use App\Http\Controllers\Api\EcoCoachController;
 use App\Http\Controllers\Api\JejakWangiController;
 use App\Http\Controllers\Api\AdminSensorDeviceController;
 use App\Http\Controllers\Api\AdminSettingsController;
@@ -45,6 +46,10 @@ Route::get('/sensors/snapshots', [SensorReadingController::class, 'snapshots']);
 Route::get('/sensors/active', [SensorReadingController::class, 'active']); // wilayah yang sedang ON (home)
 Route::get('/sensors/history', [SensorReadingController::class, 'history']); // tren harian, Monitoring Lingkungan (admin)
 
+// Eco-Coach (penjelas data berbasis AI). Login opsional: mode `tanya` boleh tamu, `ringkasan` wajib login
+// (dicek di controller lewat guard sanctum). Dibatasi per pengguna/IP untuk menekan biaya API.
+Route::post('/eco-coach', [EcoCoachController::class, 'jawab'])->middleware('throttle:eco-coach');
+
 // Autentikasi (Sanctum, token-based — cocok untuk PWA/mobile).
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
@@ -81,7 +86,7 @@ Route::get('/chargers/{id}', [ChargerStationController::class, 'show'])->whereNu
 Route::post('/mood-logs', [MoodLogController::class, 'store'])->middleware('throttle:mood-store');
 Route::get('/mood-logs/summary', [MoodLogController::class, 'summary']);
 
-// Geofencing & Soundscape Therapy. `index` publik (dipakai svarga-app dan
+// Geofencing & Soundscape Therapy. `index` publik (dipakai jejak-wangi-app dan
 // tabel manajemen zona di admin lewat ?all=1); `store` khusus admin.
 Route::get('/geofences', [GeofenceController::class, 'index']);
 Route::middleware('cache.headers:public;max_age=60;etag')->group(function () {
@@ -89,7 +94,7 @@ Route::middleware('cache.headers:public;max_age=60;etag')->group(function () {
     Route::get('/soundscapes/{id}', [SoundscapeController::class, 'show']);
 });
 
-// Endpoint khusus dashboard admin (svarga-admin) — menggantikan Prisma/Supabase
+// Endpoint khusus dashboard admin (jejak-wangi-admin) — menggantikan Prisma/Supabase
 // sepenuhnya. Semua di-guard ['auth:sanctum', 'admin'] (lihat EnsureUserIsAdmin).
 Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
     Route::prefix('admin')->group(function () {
@@ -98,6 +103,7 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::put('/users/{id}', [AdminUserController::class, 'update']);
         Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
         Route::get('/jejak-wangi/summary', [AdminJejakWangiController::class, 'summary']);
+        Route::post('/eco-coach/laporan', [EcoCoachController::class, 'laporan'])->middleware('throttle:eco-coach');
         Route::get('/activity-monthly', [AdminUserController::class, 'activityMonthly']);
         Route::get('/notifications', [AdminNotificationController::class, 'index']);
         Route::post('/notifications/mark-read', [AdminNotificationController::class, 'markAllRead']);

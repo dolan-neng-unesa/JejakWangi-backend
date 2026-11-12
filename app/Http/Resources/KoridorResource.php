@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 // Bentuk field disamakan persis dengan koridors[] di
-// src/data/mockGreenSpaces.js (svarga-app) supaya koridorService.js hanya
+// src/data/mockGreenSpaces.js (jejak-wangi-app) supaya koridorService.js hanya
 // perlu menambah satu cabang fetch, tidak perlu mapping ulang di halaman.
 // `thumbnail`/`hero_image` diubah dari path relatif jadi URL absolut di
 // sini (asset() ) — gambarnya sama persis dengan yang dulu dibundel Vite,

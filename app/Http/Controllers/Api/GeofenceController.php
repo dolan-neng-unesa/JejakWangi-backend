@@ -13,7 +13,7 @@ class GeofenceController extends Controller
 {
     /**
      * Daftar zona geofencing. Default hanya yang aktif (dikonsumsi
-     * GeofenceContext.jsx di svarga-app). Admin dashboard butuh melihat
+     * GeofenceContext.jsx di jejak-wangi-app). Admin dashboard butuh melihat
      * semua zona (termasuk nonaktif) lewat ?all=1.
      */
     public function index(Request $request)

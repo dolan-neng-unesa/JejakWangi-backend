@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\GeofenceModel;
 use Illuminate\Database\Seeder;
 
-// Data disamakan dengan geofences[] di svarga-app/src/data/mockContent.js
+// Data disamakan dengan geofences[] di jejak-wangi-app/src/data/mockContent.js
 // supaya perilaku FE tidak berubah saat pindah dari mock ke API ini.
 class GeofenceSeeder extends Seeder
 {

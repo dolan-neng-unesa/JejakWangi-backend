@@ -15,24 +15,24 @@ class AuthApiTest extends TestCase
     {
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Radhiyyan',
-            'email' => 'radhi@svarga.test',
+            'email' => 'radhi@jejakwangi.test',
             'password' => 'rahasia123',
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('user.email', 'radhi@svarga.test')
+            ->assertJsonPath('user.email', 'radhi@jejakwangi.test')
             ->assertJsonStructure(['user' => ['id', 'name', 'email'], 'token']);
 
-        $this->assertDatabaseHas('users', ['email' => 'radhi@svarga.test']);
+        $this->assertDatabaseHas('users', ['email' => 'radhi@jejakwangi.test']);
     }
 
     public function test_email_yang_sudah_terdaftar_ditolak(): void
     {
-        UserModel::factory()->create(['email' => 'dipakai@svarga.test']);
+        UserModel::factory()->create(['email' => 'dipakai@jejakwangi.test']);
 
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Lainnya',
-            'email' => 'dipakai@svarga.test',
+            'email' => 'dipakai@jejakwangi.test',
             'password' => 'rahasia123',
         ]);
 
@@ -42,12 +42,12 @@ class AuthApiTest extends TestCase
     public function test_login_dengan_kredensial_benar_menerima_token(): void
     {
         UserModel::factory()->create([
-            'email' => 'levina@svarga.test',
+            'email' => 'levina@jejakwangi.test',
             'password' => Hash::make('sandiaman'),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'levina@svarga.test',
+            'email' => 'levina@jejakwangi.test',
             'password' => 'sandiaman',
         ]);
 
@@ -58,7 +58,7 @@ class AuthApiTest extends TestCase
     {
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Bukan Admin',
-            'email' => 'bukan-admin@svarga.test',
+            'email' => 'bukan-admin@jejakwangi.test',
             'password' => 'rahasia123',
             'is_admin' => true, // seharusnya diabaikan
         ]);
@@ -69,13 +69,13 @@ class AuthApiTest extends TestCase
     public function test_user_dengan_is_admin_true_bisa_login_dan_field_is_admin_terlihat(): void
     {
         UserModel::factory()->create([
-            'email' => 'admin-test@svarga.test',
+            'email' => 'admin-test@jejakwangi.test',
             'password' => Hash::make('adminpass'),
             'is_admin' => true,
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'admin-test@svarga.test',
+            'email' => 'admin-test@jejakwangi.test',
             'password' => 'adminpass',
         ]);
 
@@ -85,12 +85,12 @@ class AuthApiTest extends TestCase
     public function test_login_dengan_password_salah_ditolak(): void
     {
         UserModel::factory()->create([
-            'email' => 'levina@svarga.test',
+            'email' => 'levina@jejakwangi.test',
             'password' => Hash::make('sandiaman'),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'levina@svarga.test',
+            'email' => 'levina@jejakwangi.test',
             'password' => 'salah',
         ]);
 

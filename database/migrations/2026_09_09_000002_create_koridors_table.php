@@ -34,7 +34,7 @@ return new class extends Migration
             // Snapshot sensor non-suhu/kualitas-udara (kelembaban, kebisingan, UV) —
             // dua sensor itu (suhu & kualitas udara) sudah punya jalur live tersendiri
             // lewat sensor_readings (lihat SensorReadingController & useSensorReading.js
-            // di svarga-app), jadi tidak perlu diduplikasi di sini.
+            // di jejak-wangi-app), jadi tidak perlu diduplikasi di sini.
             $table->json('sensor_snapshot')->nullable();
             $table->timestamps();
         });

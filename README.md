@@ -1,6 +1,6 @@
-# backend-patch — tambahan svarga-backend untuk dashboard admin
+# backend-patch — tambahan jejak-wangi-backend untuk dashboard admin
 
-Salin isi folder ini ke `svarga-backend/` (timpa file yang sama), lalu:
+Salin isi folder ini ke `jejak-wangi-backend/` (timpa file yang sama), lalu:
 
 ```bash
 php artisan migrate
@@ -11,7 +11,7 @@ Baru:
 - `AdminSensorDeviceController`  — CRUD perangkat sensor + putar kunci API
 - `AdminSettingsController`     — pengaturan, info sistem, backup & unduh backup
 - `AppSettingModel`, 2 migrasi  — tabel `app_settings`; kolom `name` & `is_maintenance` di `sensor_devices`
-- `Console/Commands/MonitorSystem` — `svarga:monitor` (sensor offline & AQI tinggi → notifikasi), terjadwal tiap 5 menit
+- `Console/Commands/MonitorSystem` — `jejakwangi:monitor` (sensor offline & AQI tinggi → notifikasi), terjadwal tiap 5 menit
 
 Diubah (perubahan kecil, ditandai di kode):
 - `routes/api.php`, `routes/console.php`
@@ -43,7 +43,7 @@ FACEBOOK_APP_SECRET=...
 ```
 
 - Di Google Cloud Console, tambahkan domain FE ke **Authorized JavaScript origins**
-  (mis. `https://svarga.id` dan `http://localhost:5173`). Di Meta, tambahkan domain FE ke
+  (mis. `https://jejakwangi.id` dan `http://localhost:5173`). Di Meta, tambahkan domain FE ke
   **App Domains** dan aktifkan Facebook Login for Web. Facebook mewajibkan HTTPS di production.
 - Urutan pencarian akun: ID penyedia → email yang sudah diverifikasi penyedia (ditautkan ke
   akun email yang ada) → akun baru. Akun sosial baru **tidak pernah admin**.

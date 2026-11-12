@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 // Bentuk field disamakan persis dengan geofences[] di
-// svarga-app/src/data/mockContent.js supaya GeofenceContext.jsx tidak perlu
+// jejak-wangi-app/src/data/mockContent.js supaya GeofenceContext.jsx tidak perlu
 // mapping tambahan saat pindah dari mock ke API ini.
 class GeofenceResource extends JsonResource
 {

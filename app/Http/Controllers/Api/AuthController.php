@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 /**
  * Autentikasi berbasis token (Laravel Sanctum "personal access token"),
  * cocok untuk PWA/mobile (bukan cookie/CSRF seperti SPA-mode Sanctum).
- * Dipakai svarga-app (lihat src/services/authService.js): email/kata sandi
+ * Dipakai jejak-wangi-app (lihat src/services/authService.js): email/kata sandi
  * serta login sosial Google & Facebook (lihat social()).
  *
  * Login tamu (tanpa akun) tetap didukung penuh di FE: endpoint di sini
@@ -202,7 +202,7 @@ class AuthController extends Controller
     {
         $minutes = (int) config('sanctum.expiration');
         $expiresAt = $minutes > 0 ? now()->addMinutes($minutes) : null;
-        $newToken = $user->createToken('svarga-app', ['*'], $expiresAt);
+        $newToken = $user->createToken('jejak-wangi-app', ['*'], $expiresAt);
 
         $stale = $user->tokens()->orderByDesc('id')->pluck('id')->slice(self::MAX_TOKENS);
         if ($stale->isNotEmpty()) {

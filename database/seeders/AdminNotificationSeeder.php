@@ -44,7 +44,7 @@ class AdminNotificationSeeder extends Seeder
             [
                 'category' => 'pengguna',
                 'title' => 'Akun Admin Default Dibuat',
-                'description' => 'Akun admin@svarga.id dibuat lewat AdminUserSeeder untuk kebutuhan login dashboard.',
+                'description' => 'Akun admin@jejakwangi.id dibuat lewat AdminUserSeeder untuk kebutuhan login dashboard.',
                 'is_read' => true,
                 'created_at' => $now->copy()->subDays(2),
                 'updated_at' => $now->copy()->subDays(2),
