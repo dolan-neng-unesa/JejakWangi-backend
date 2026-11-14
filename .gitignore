@@ -1,5 +1,13 @@
+<<<<<<< HEAD
+node_modules
+dist
+.env
+.env.local
+*.log
+=======
 *
 !.gitignore
+<<<<<<< HEAD
 
 
 # Dependencies
@@ -65,3 +73,6 @@ Homestead.json
 Homestead.yaml
 /.phpunit.cache
 /auth.json
+=======
+>>>>>>> 11277a5008152cfb3fea2a9f9fdf4ba8d2265cde
+>>>>>>> b40db309bac1acf0ab31ddcf60b96900f1a10ebd
