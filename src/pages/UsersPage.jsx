@@ -12,7 +12,7 @@ import { EmptyState, ErrorState, TableSkeleton } from "../components/ui/States";
 import { useAsync, useDebounced } from "../hooks/useAsync";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
-import { users as usersApi } from "../services/svarga";
+import { users as usersApi } from "../services/jejakwangi";
 import { fmtNum, pct } from "../lib/format";
 
 const AVATAR = ["#3f6e45", "#0288d1", "#ed6c02", "#8e24aa", "#00897b", "#6d4c41", "#455a64"];
@@ -60,7 +60,7 @@ export default function UsersPage() {
 
   return (
     <>
-      <PageHeader title="Pengguna" chip="Semua User" subtitle="Manajemen akun pengguna, verifikasi peran, dan pemantauan keaktifan masyarakat Svarga." showRegion>
+      <PageHeader title="Pengguna" chip="Semua User" subtitle="Manajemen akun pengguna, verifikasi peran, dan pemantauan keaktifan masyarakat Jejak Wangi." showRegion>
         <label className="relative">
           <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-700" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari pengguna..." aria-label="Cari pengguna"
@@ -78,7 +78,7 @@ export default function UsersPage() {
       </div>
 
       <Card className="p-5">
-        <CardTitle>Daftar Akun Pengguna Svarga</CardTitle>
+        <CardTitle>Daftar Akun Pengguna Jejak Wangi</CardTitle>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm min-w-[760px]">
             <thead className="bg-canvas">
@@ -168,7 +168,7 @@ function UserForm({ mode, user, me, onClose, onSaved }) {
   }
 
   return (
-    <Modal open onClose={onClose} title={edit ? "Ubah Pengguna" : "Tambah Pengguna"} subtitle={edit ? user.email : "Akun baru langsung dapat login ke aplikasi SVARGA."}
+    <Modal open onClose={onClose} title={edit ? "Ubah Pengguna" : "Tambah Pengguna"} subtitle={edit ? user.email : "Akun baru langsung dapat login ke aplikasi JEJAKWANGI."}
       footer={<><Button variant="secondary" onClick={onClose}>Batal</Button><Button loading={busy} onClick={submit}>{edit ? "Simpan Perubahan" : "Tambah Pengguna"}</Button></>}>
       <form onSubmit={submit} className="space-y-4" noValidate>
         <Field label="Nama lengkap" required error={errors.name} htmlFor="u-name"><Input id="u-name" value={f.name} onChange={(e) => set("name")(e.target.value)} invalid={!!errors.name} autoFocus /></Field>

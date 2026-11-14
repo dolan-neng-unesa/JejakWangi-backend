@@ -5,7 +5,7 @@ import { Card, CardTitle } from "../components/ui/Card";
 import { ErrorState, Skeleton } from "../components/ui/States";
 import { BarChart, Donut } from "../components/charts/Charts";
 import { useAsync } from "../hooks/useAsync";
-import { jejakWangi } from "../services/svarga";
+import { jejakWangi } from "../services/jejakwangi";
 import { fmtNum } from "../lib/format";
 
 const MODA = [

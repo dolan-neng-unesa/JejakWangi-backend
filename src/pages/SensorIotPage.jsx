@@ -14,7 +14,7 @@ import { useSettings } from "../context/SettingsContext";
 import { useAsync } from "../hooks/useAsync";
 import { koridorLabel } from "../hooks/useEnvironment";
 import { useToast } from "../context/ToastContext";
-import { content, devices as api, geofences as zonesApi } from "../services/svarga";
+import { content, devices as api, geofences as zonesApi } from "../services/jejakwangi";
 import { SENSOR_LABEL, SENSOR_UNIT, koridorPosition } from "../lib/env";
 import { ago, formatTanggalJam, fmtNum, pct } from "../lib/format";
 
@@ -51,7 +51,7 @@ export default function SensorIotPage() {
 
   return (
     <>
-      <PageHeader title="Sensor IoT" chip="Live Network" subtitle="Manajemen dan monitoring status sensor IoT Svarga di seluruh wilayah Banyuwangi.">
+      <PageHeader title="Sensor IoT" chip="Live Network" subtitle="Manajemen dan monitoring status sensor IoT Jejak Wangi di seluruh wilayah Banyuwangi.">
         <FilterSelect label="Lokasi" value={loc} onChange={setLoc} options={[{ value: "all", label: "Semua Lokasi" }, ...ks.map((k) => ({ value: k.id, label: koridorLabel(k) }))]} />
         <Button icon={Plus} onClick={() => setForm({})}>Tambah Sensor</Button>
       </PageHeader>

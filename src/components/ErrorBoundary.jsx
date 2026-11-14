@@ -17,7 +17,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error) {
-    console.error("[SVARGA Admin] Galat tak tertangani di UI:", error);
+    console.error("[JEJAK WANGI Admin] Galat tak tertangani di UI:", error);
   }
 
   render() {

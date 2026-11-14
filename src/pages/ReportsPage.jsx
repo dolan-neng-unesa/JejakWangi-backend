@@ -7,10 +7,11 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { FilterSelect } from "../components/ui/Field";
 import { ErrorState, Skeleton } from "../components/ui/States";
+import AsistenLaporan from "../components/AsistenLaporan";
 import { BarChart, Legend, LineChart } from "../components/charts/Charts";
 import { useAsync } from "../hooks/useAsync";
 import { cityAggregate, koridorLabel, useEnvironment } from "../hooks/useEnvironment";
-import { devices, mood, sensors, users } from "../services/svarga";
+import { devices, mood, sensors, users } from "../services/jejakwangi";
 import { aqiInfo, moodLabel } from "../lib/env";
 import { downloadCsv, formatTanggal, fmtNum, todayISO } from "../lib/format";
 
@@ -46,6 +47,8 @@ export default function ReportsPage() {
         <FilterSelect label="Periode" value={days} onChange={(v) => setDays(Number(v))} options={PERIODS} />
         <Button variant="secondary" icon={Printer} onClick={() => window.print()}>Cetak / PDF</Button>
       </PageHeader>
+
+      <AsistenLaporan />
 
       {data.error && !d ? <Card><ErrorState error={data.error} onRetry={data.reload} /></Card> : (
         <>

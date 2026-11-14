@@ -1,5 +1,5 @@
 import { useAsync } from "./useAsync";
-import { content, geofences as geofencesApi, loadKoridorSnapshots } from "../services/svarga";
+import { content, geofences as geofencesApi, loadKoridorSnapshots } from "../services/jejakwangi";
 import { avg, mergeCondition } from "../lib/env";
 import { cachedStatic } from "../lib/staticCache";
 

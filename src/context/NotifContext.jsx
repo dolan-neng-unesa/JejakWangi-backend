@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { notifications } from "../services/svarga";
+import { notifications } from "../services/jejakwangi";
 import { useAuth } from "./AuthContext";
 import { useSettings } from "./SettingsContext";
 
@@ -33,7 +33,7 @@ export function NotifProvider({ children }) {
         items
           .filter((n) => n.id > lastId.current && n.unread && s[`notify.cat.${n.kategori}`] !== false)
           .reverse()
-          .forEach((n) => { try { new Notification(n.title, { body: n.desc, icon: "/favicon.svg", tag: `svarga-${n.id}` }); } catch { /* browser menolak */ } });
+          .forEach((n) => { try { new Notification(n.title, { body: n.desc, icon: "/favicon.svg", tag: `jejak-wangi-${n.id}` }); } catch { /* browser menolak */ } });
       }
       lastId.current = Math.max(lastId.current, maxId);
     } catch { /* diam — badge tidak kritis */ }

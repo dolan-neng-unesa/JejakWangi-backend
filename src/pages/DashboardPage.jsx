@@ -10,7 +10,7 @@ import { FitTo, MapView, PinLabel } from "../components/map/MapView";
 import { useSettings } from "../context/SettingsContext";
 import { useAsync } from "../hooks/useAsync";
 import { cityAggregate, koridorLabel, useEnvironment } from "../hooks/useEnvironment";
-import { devices, festivals, mood, users } from "../services/svarga";
+import { devices, festivals, mood, users } from "../services/jejakwangi";
 import { MOOD_LEVELS, TONE, aqiInfo, bisingInfo, kelembapanInfo, koridorPosition, suhuInfo, uvInfo } from "../lib/env";
 import { formatTanggal, fmtNum, pct, todayISO } from "../lib/format";
 import { circleAreaHa } from "../lib/geo";

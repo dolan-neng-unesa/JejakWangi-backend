@@ -1,4 +1,4 @@
-// Util geometri peta (sama dengan svarga-app/src/lib/geo.js + kecepatan per moda).
+// Util geometri peta (sama dengan jejak-wangi-app/src/lib/geo.js + kecepatan per moda).
 const R = 6371000;
 
 export const SPEED_M_PER_MIN = { jalan: 80, sepeda: 250, bus: 333 }; // 4,8 / 15 / 20 km/jam

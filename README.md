@@ -1,12 +1,12 @@
-# SVARGA Admin Dashboard
+# JEJAK WANGI Admin Dashboard
 
-Dashboard admin untuk ekosistem SVARGA (React 19 + Vite + Tailwind 4 + Leaflet — stack yang sama dengan `svarga-app`).
-Tampilan mengikuti mockup "SVARGA UI Design"; data langsung dari `svarga-backend` (Laravel + Sanctum).
+Dashboard admin untuk ekosistem JEJAK WANGI (React 19 + Vite + Tailwind 4 + Leaflet — stack yang sama dengan `jejak-wangi-app`).
+Tampilan mengikuti mockup "JEJAK WANGI UI Design"; data langsung dari `jejak-wangi-backend` (Laravel + Sanctum).
 
 ## Menjalankan
 
 ```bash
-# 1. Backend: salin isi ../backend-patch ke svarga-backend/ lalu
+# 1. Backend: salin isi ../backend-patch ke jejak-wangi-backend/ lalu
 php artisan migrate && php artisan serve          # http://localhost:8000
 
 # 2. Admin
@@ -14,10 +14,10 @@ cp .env.example .env                               # VITE_API_URL=http://localho
 npm install
 npm run dev                                        # http://localhost:5174
 ```
-Login memakai akun `is_admin = true` (seeder: `admin@svarga.id`). Akun non-admin ditolak.
+Login memakai akun `is_admin = true` (seeder: `admin@jejakwangi.id`). Akun non-admin ditolak.
 
 **Tanpa backend (hanya preview UI):** `npm run mock` lalu `npm run dev` — mock API (`dev/mock-api.mjs`)
-meniru kontrak backend, login `admin@svarga.id` / `svarga123`.
+meniru kontrak backend, login `admin@jejakwangi.id` / `jejakwangi123`.
 
 ## Halaman ↔ endpoint
 

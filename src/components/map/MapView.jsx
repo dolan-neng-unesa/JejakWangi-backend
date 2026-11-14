@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, useMap, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Pusat kota Banyuwangi (antara Taman Sritanjung & Taman Blambangan) — sama dengan svarga-app.
+// Pusat kota Banyuwangi (antara Taman Sritanjung & Taman Blambangan) — sama dengan jejak-wangi-app.
 export const MAP_CENTER = [-8.2185, 114.3686];
 
 const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';

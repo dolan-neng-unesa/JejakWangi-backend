@@ -1,8 +1,8 @@
-// Klien HTTP untuk svarga-backend (Laravel + Sanctum token).
+// Klien HTTP untuk jejak-wangi-backend (Laravel + Sanctum token).
 // Bentuk response mengikuti controller yang ada di backend — lihat komentar tiap fungsi.
 
 export const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:8000/api").replace(/\/+$/, "");
-const TOKEN_KEY = "svarga-admin:token";
+const TOKEN_KEY = "jejak-wangi-admin:token";
 
 export class ApiError extends Error {
   constructor(message, status = 0, errors = null, retryAfter = null) {
@@ -44,7 +44,8 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 
 async function send(method, path, { query, body, auth = true, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const headers = { Accept: "application/json" };
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  if (body !== undefined && !isForm) headers["Content-Type"] = "application/json"; // FormData: browser mengisi boundary sendiri
   const token = getToken();
   if (auth && token) headers.Authorization = `Bearer ${token}`;
 
@@ -64,7 +65,7 @@ async function send(method, path, { query, body, auth = true, signal, timeoutMs 
     res = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
       signal: controller.signal,
     });
   } catch (err) {

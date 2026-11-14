@@ -5,9 +5,9 @@
 @import "@fontsource/poppins/700.css";
 
 /* =========================================================
-   SVARGA Admin — Design Tokens
-   Diambil langsung dari mockup "SVARGA UI Design" (dashboard admin).
-   Hijau utama sama dengan svarga-app (canopy-700 = #3f6e45).
+   JEJAK WANGI Admin — Design Tokens
+   Diambil langsung dari mockup "JEJAK WANGI UI Design" (dashboard admin).
+   Hijau utama sama dengan jejak-wangi-app (canopy-700 = #3f6e45).
    ========================================================= */
 @theme {
   --font-sans: "Poppins", system-ui, sans-serif;

@@ -48,7 +48,7 @@ export function bisingInfo(db) {
   return { label: "Bising", tone: "danger" };
 }
 
-/** Mood 1..5 → label & warna (sama dengan MOODS di MoodTrackerPage svarga-app). */
+/** Mood 1..5 → label & warna (sama dengan MOODS di MoodTrackerPage jejak-wangi-app). */
 export const MOOD_LEVELS = [
   { score: 5, label: "Sangat Baik", color: "#2e7d32" },
   { score: 4, label: "Baik", color: "#3f6e45" },

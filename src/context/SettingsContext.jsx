@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { settings as settingsApi } from "../services/svarga";
+import { settings as settingsApi } from "../services/jejakwangi";
 import { setTimeZone } from "../lib/format";
 import { useAuth } from "./AuthContext";
 
 // Nilai bawaan — harus sama dengan AppSettingModel::DEFAULTS di backend.
 export const DEFAULT_SETTINGS = {
-  "app.name": "SVARGA",
+  "app.name": "JEJAK WANGI",
   "app.region_label": "Banyuwangi Mandiri",
   "app.language": "id",
   "app.timezone": "Asia/Jakarta",

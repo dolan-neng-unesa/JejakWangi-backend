@@ -9,7 +9,7 @@ import { Field, FilterSelect, Input, Select, Textarea, Toggle } from "../compone
 import { EmptyState, ErrorState, Skeleton } from "../components/ui/States";
 import { useAsync } from "../hooks/useAsync";
 import { useToast } from "../context/ToastContext";
-import { festivals as api } from "../services/svarga";
+import { festivals as api } from "../services/jejakwangi";
 import { HARI, bulanNama, formatTanggal, isoDate, todayISO } from "../lib/format";
 
 const CATS = [{ value: "", label: "Semua Kategori" }, { value: "budaya", label: "Budaya" }, { value: "pariwisata", label: "Pariwisata" }, { value: "seni", label: "Seni" }];

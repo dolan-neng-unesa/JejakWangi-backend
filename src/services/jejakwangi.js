@@ -1,4 +1,4 @@
-// Seluruh pemanggilan endpoint svarga-backend dikumpulkan di sini supaya halaman
+// Seluruh pemanggilan endpoint jejak-wangi-backend dikumpulkan di sini supaya halaman
 // tidak perlu tahu bentuk URL/response Laravel (Resource membungkus di `data`).
 import { api, ApiError, unwrap } from "../lib/api";
 import { invalidateStatic } from "../lib/staticCache";
@@ -62,6 +62,12 @@ export const mood = {
   summary: (params) => api.get("/mood-logs/summary", params),
 };
 
+// Eco-Coach: Asisten Laporan mingguan. Angka dihitung server dari database; AI hanya menjelaskan,
+// dan bila AI tidak tersedia server memberi ringkasan template. → { data: { teks, sumber: "ai"|"template" } }
+export const ecoCoach = {
+  laporan: async () => unwrap(await api.post("/admin/eco-coach/laporan", undefined, { timeoutMs: 30_000 })),
+};
+
 // --- Endpoint tambahan khusus admin (lihat folder backend-patch/) ---
 export const devices = {
   list: () => api.get("/admin/sensor-devices"), // → { data, summary }
@@ -100,3 +106,25 @@ export async function loadKoridorSnapshots(koridors) {
   );
   return Object.fromEntries(results);
 }
+
+// Lapor Koridor (laporan warga → tindak lanjut DLH). Lampiran dikirim multipart (FormData).
+export const reports = {
+  meta: async () => unwrap(await api.get("/reports/meta")),
+  list: (params) => api.get("/admin/reports", params), // → { data, page, last_page, filtered_total, total, menunggu, diproses, selesai, ditolak }
+  get: async (id) => unwrap(await api.get(`/admin/reports/${id}`)),
+  create: (form) => api.post("/admin/reports", form),
+  update: (id, form) => api.post(`/admin/reports/${id}`, form),
+};
+
+// Sampah & Pangan (penimbangan, poin, pengolahan).
+export const waste = {
+  meta: async () => unwrap(await api.get("/admin/waste/meta")),
+  summary: async (params) => unwrap(await api.get("/admin/waste/summary", params)),
+  list: (params) => api.get("/admin/waste", params),
+  get: async (id) => unwrap(await api.get(`/admin/waste/${id}`)),
+  checkins: async (params) => unwrap(await api.get("/admin/waste/checkins", params)),
+  create: (body) => api.post("/admin/waste", body),
+  update: (id, body) => api.put(`/admin/waste/${id}`, body),
+  remove: (id) => api.del(`/admin/waste/${id}`),
+  process: (id, undo = false) => api.post(`/admin/waste/${id}/process`, { undo }),
+};

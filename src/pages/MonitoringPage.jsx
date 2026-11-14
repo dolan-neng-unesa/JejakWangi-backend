@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Droplet, Info, Sun, Thermometer, Volume2, Wind } from "lucide-react";
 import { PageHeader } from "../components/ui/PageHeader";
 import { StatCard } from "../components/ui/StatCard";
@@ -13,7 +14,7 @@ import { Donut, Legend, LineChart } from "../components/charts/Charts";
 import { useSettings } from "../context/SettingsContext";
 import { useAsync } from "../hooks/useAsync";
 import { cityAggregate, koridorLabel, useEnvironment } from "../hooks/useEnvironment";
-import { sensors } from "../services/svarga";
+import { sensors } from "../services/jejakwangi";
 import { SENSOR_UNIT, TONE, aqiInfo, avg, bisingInfo, kelembapanInfo, suhuInfo, uvInfo } from "../lib/env";
 import { POLLUTANTS, toIspuIndex, ispuCategory } from "../lib/ispu";
 import { ago, fmtNum, pct } from "../lib/format";
@@ -303,7 +304,7 @@ function DetailModal({ c, onClose, days }) {
   const daily = hist.data ?? [];
   return (
     <Modal open onClose={onClose} size="lg" title={koridorLabel(k)} subtitle={`${k.formal_name} — ${k.route_label || ""}`}
-      footer={<Button variant="secondary" onClick={onClose}>Tutup</Button>}>
+      footer={<><Link to={`/monitoring/koridor/${k.id}`}><Button variant="soft">Buka halaman koridor →</Button></Link><Button variant="secondary" onClick={onClose}>Tutup</Button></>}>
       <div className="grid gap-3 grid-cols-2 md:grid-cols-5 mb-5">
         <Mini label="AQI" value={c.aqi ?? "—"} badge={<Badge tone={c.aqiInfo.tone}>{c.aqiInfo.label}</Badge>} />
         <Mini label="Suhu" value={c.suhu == null ? "—" : `${fmtNum(c.suhu, 1)}°C`} badge={<Badge tone={c.suhuInfo.tone}>{c.suhuInfo.label}</Badge>} />

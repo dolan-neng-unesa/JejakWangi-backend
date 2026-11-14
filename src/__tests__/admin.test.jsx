@@ -33,7 +33,7 @@ describe("loadKoridorSnapshots", () => {
   it("memakai SATU request massal dan mengisi koridor tanpa bacaan dengan snapshot kosong", async () => {
     const fetchMock = vi.fn(async () => json({ snapshots: { 1: { koridor_id: "1", is_stale: false, readings: { pm25: { value: 10 } } } } }));
     vi.stubGlobal("fetch", fetchMock);
-    const { loadKoridorSnapshots } = await import("../services/svarga");
+    const { loadKoridorSnapshots } = await import("../services/jejakwangi");
 
     const snaps = await loadKoridorSnapshots(koridors);
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ describe("loadKoridorSnapshots", () => {
         : json({ koridor_id: "x", is_stale: false, readings: {} })
     );
     vi.stubGlobal("fetch", fetchMock);
-    const { loadKoridorSnapshots } = await import("../services/svarga");
+    const { loadKoridorSnapshots } = await import("../services/jejakwangi");
 
     const snaps = await loadKoridorSnapshots(koridors);
     expect(fetchMock).toHaveBeenCalledTimes(1 + koridors.length);
@@ -59,7 +59,7 @@ describe("loadKoridorSnapshots", () => {
   it("server error (500) TIDAK melipatgandakan request; semua koridor jadi baseline (null)", async () => {
     const fetchMock = vi.fn(async () => json({ message: "boom" }, { status: 500 }));
     vi.stubGlobal("fetch", fetchMock);
-    const { loadKoridorSnapshots } = await import("../services/svarga");
+    const { loadKoridorSnapshots } = await import("../services/jejakwangi");
 
     const snaps = await loadKoridorSnapshots(koridors);
     expect(fetchMock).toHaveBeenCalledTimes(1);

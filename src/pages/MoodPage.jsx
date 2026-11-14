@@ -10,7 +10,7 @@ import { FilterSelect } from "../components/ui/Field";
 import { ErrorState, Skeleton } from "../components/ui/States";
 import { Donut, Legend, LineChart } from "../components/charts/Charts";
 import { useAsync } from "../hooks/useAsync";
-import { content, mood } from "../services/svarga";
+import { content, mood } from "../services/jejakwangi";
 import { MOOD_LEVELS, moodLabel } from "../lib/env";
 import { downloadCsv, formatTanggal, fmtNum, pct } from "../lib/format";
 

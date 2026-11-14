@@ -24,7 +24,7 @@ export default function LoginPage() {
   async function submit(e) {
     e.preventDefault();
     setError("");
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Masukkan alamat email yang valid (contoh: admin@svarga.id).");
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Masukkan alamat email yang valid (contoh: admin@jejakwangi.id).");
     if (!password) return setError("Kata sandi wajib diisi.");
     setBusy(true);
     try {
@@ -42,7 +42,7 @@ export default function LoginPage() {
       <form onSubmit={submit} className="w-full max-w-[462px] flex flex-col items-center" noValidate>
         <div className="flex items-center gap-3">
           <span className="h-11 w-11 rounded-xl bg-white inline-flex items-center justify-center"><Leaf size={22} className="text-brand-700" /></span>
-          <h1 className="text-[44px] leading-none font-bold text-white tracking-wide">SVARGA</h1>
+          <h1 className="text-[44px] leading-none font-bold text-white tracking-wide">JEJAK WANGI</h1>
         </div>
         <p className="text-white text-lg mt-6 mb-12">Sehat. Nyaman. Terhubung.</p>
 
@@ -71,7 +71,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <Modal open={forgot} onClose={() => setForgot(false)} title="Lupa kata sandi?" subtitle="Reset dilakukan oleh administrator — SVARGA belum memakai tautan reset lewat email."
+      <Modal open={forgot} onClose={() => setForgot(false)} title="Lupa kata sandi?" subtitle="Reset dilakukan oleh administrator — JEJAK WANGI belum memakai tautan reset lewat email."
         footer={<Button onClick={() => setForgot(false)}>Mengerti</Button>}>
         <div className="text-sm text-brand-800 space-y-4 leading-relaxed">
           <div>
@@ -81,7 +81,7 @@ export default function LoginPage() {
           <div>
             <p className="font-semibold text-brand-700 mb-1">Cara 2 — lewat server (jika satu-satunya admin)</p>
             <pre className="bg-canvas border border-brand-200 rounded-lg p-3 text-xs overflow-x-auto">{`php artisan tinker
->>> App\\Models\\UserModel::where('email','admin@svarga.id')
+>>> App\\Models\\UserModel::where('email','admin@jejakwangi.id')
 ...     ->first()->update(['password' => 'sandi-baru']);`}</pre>
           </div>
         </div>

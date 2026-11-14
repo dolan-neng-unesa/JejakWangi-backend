@@ -11,7 +11,7 @@ import { NotifSettings } from "../components/NotifSettings";
 import { useSettings } from "../context/SettingsContext";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { settings as settingsApi, users } from "../services/svarga";
+import { settings as settingsApi, users } from "../services/jejakwangi";
 import { TZ_LABEL, formatTanggalJam, formatTanggal } from "../lib/format";
 
 const TABS = ["Profil", "Aplikasi", "Sensor IoT", "Geofencing", "Notifikasi", "Integrasi"].map((l) => ({ value: l, label: l }));
@@ -214,7 +214,7 @@ function IntegrationModal({ k, item, info, onClose }) {
         {k === "email" && (
           <>
             {info?.mailer === "log" && <p className="text-xs rounded-lg bg-warn-bg text-warn px-3 py-2">Server memakai <code>MAIL_MAILER=log</code> — email hanya ditulis ke log, belum terkirim. Atur SMTP di <code>.env</code> backend agar benar-benar terkirim.</p>}
-            <Field label="Penerima laporan (pisahkan dengan koma)" error={err} htmlFor="i-r"><Textarea id="i-r" rows={2} value={rec} onChange={(e) => { setRec(e.target.value); setErr(""); }} placeholder="admin@svarga.id, dinas@banyuwangikab.go.id" /></Field>
+            <Field label="Penerima laporan (pisahkan dengan koma)" error={err} htmlFor="i-r"><Textarea id="i-r" rows={2} value={rec} onChange={(e) => { setRec(e.target.value); setErr(""); }} placeholder="admin@jejakwangi.id, dinas@banyuwangikab.go.id" /></Field>
             <Field label="Frekuensi ringkasan" htmlFor="i-d"><Select id="i-d" value={digest} onChange={(e) => setDigest(e.target.value)}><option value="harian">Harian</option><option value="mingguan">Mingguan</option><option value="nonaktif">Nonaktif</option></Select></Field>
           </>
         )}

@@ -1,5 +1,5 @@
 // Mesin Smart Green Route untuk admin.
-// 1) Jalur dicocokkan ke jalan nyata lewat layanan routing OSM (sama dengan svarga-app/roadSnap.js).
+// 1) Jalur dicocokkan ke jalan nyata lewat layanan routing OSM (sama dengan jejak-wangi-app/roadSnap.js).
 //    Kalau layanan tak terjangkau → jatuh balik ke garis lurus antar titik (snapped:false).
 // 2) Tiap jalur dinilai dari data lingkungan koridor/taman terdekat: AQI, kebisingan, keteduhan.
 import { haversineMeters, pathLengthMeters, estimateMinutes } from "./geo";

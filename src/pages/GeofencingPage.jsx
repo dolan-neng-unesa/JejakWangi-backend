@@ -13,7 +13,7 @@ import { useAsync } from "../hooks/useAsync";
 import { koridorLabel } from "../hooks/useEnvironment";
 import { useToast } from "../context/ToastContext";
 import { useSettings } from "../context/SettingsContext";
-import { content, geofences as api } from "../services/svarga";
+import { content, geofences as api } from "../services/jejakwangi";
 import { circleAreaHa } from "../lib/geo";
 import { fmtNum } from "../lib/format";
 

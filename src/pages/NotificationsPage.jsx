@@ -10,7 +10,7 @@ import { NotifSettings } from "../components/NotifSettings";
 import { useAsync } from "../hooks/useAsync";
 import { useNotifBadge } from "../context/NotifContext";
 import { useToast } from "../context/ToastContext";
-import { notifications as api } from "../services/svarga";
+import { notifications as api } from "../services/jejakwangi";
 import { formatTanggal, fmtNum, relativeTime, todayISO } from "../lib/format";
 
 const CAT = {

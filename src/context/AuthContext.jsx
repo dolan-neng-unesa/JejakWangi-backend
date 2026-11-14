@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ApiError, getToken, setToken, setUnauthorizedHandler } from "../lib/api";
-import { auth } from "../services/svarga";
+import { auth } from "../services/jejakwangi";
 
 const AuthCtx = createContext(null);
 export const useAuth = () => useContext(AuthCtx);
@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
       setToken(res?.token);
       try { await auth.logout(); } catch { /* abaikan */ }
       setToken(null);
-      throw new ApiError("Akun ini bukan admin. Dashboard hanya untuk administrator SVARGA.", 403);
+      throw new ApiError("Akun ini bukan admin. Dashboard hanya untuk administrator JEJAKWANGI.", 403);
     }
     setToken(res.token);
     setUser(res.user);
