@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AdminNotificationSeeder::class,
             ChargerStationSeeder::class,
             KasirDemoSeeder::class,
+            ReportsWasteSeeder::class,
         ]);
     }
 }

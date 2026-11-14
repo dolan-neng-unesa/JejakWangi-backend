@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AdminJejakWangiController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\ByoController;
 use App\Http\Controllers\Api\ChargerStationController;
+use App\Http\Controllers\Api\CorridorReportController;
+use App\Http\Controllers\Api\WasteController;
 use App\Http\Controllers\Api\EcoCoachController;
 use App\Http\Controllers\Api\JejakWangiController;
 use App\Http\Controllers\Api\AdminSensorDeviceController;
@@ -69,6 +71,15 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Zero-waste: kasir menerbitkan QR, pelanggan memindai.
     Route::post('/byo/token', [ByoController::class, 'issue'])->middleware('throttle:30,1');
     Route::post('/byo/confirm', [ByoController::class, 'confirm'])->middleware('throttle:20,1');
+    // Lapor Koridor (warga) & Sampah/Pangan (pengguna memindai QR lokasi, mengonfirmasi hasil timbang).
+    Route::get('/reports/meta', [CorridorReportController::class, 'meta']);
+    Route::post('/reports', [CorridorReportController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/me/reports', [CorridorReportController::class, 'mine']);
+    Route::post('/reports/{id}/respond', [CorridorReportController::class, 'respond'])->whereNumber('id');
+    Route::post('/waste/checkin', [WasteController::class, 'checkin'])->middleware('throttle:20,1');
+    Route::get('/waste/mine', [WasteController::class, 'mine']);
+    Route::post('/waste/{id}/confirm', [WasteController::class, 'confirm'])->whereNumber('id')->middleware('throttle:30,1');
+    Route::post('/waste/{id}/correction', [WasteController::class, 'correction'])->whereNumber('id')->middleware('throttle:30,1');
     Route::post('/vouchers/{id}/redeem', [JejakWangiController::class, 'redeemVoucher'])->whereNumber('id');
 });
 
@@ -114,6 +125,21 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::put('/sensor-devices/{id}', [AdminSensorDeviceController::class, 'update']);
         Route::post('/sensor-devices/{id}/rotate-key', [AdminSensorDeviceController::class, 'rotateKey']);
         Route::delete('/sensor-devices/{id}', [AdminSensorDeviceController::class, 'destroy']);
+
+        // Lapor Koridor & Sampah/Pangan (halaman admin).
+        Route::get('/reports', [CorridorReportController::class, 'index']);
+        Route::post('/reports', [CorridorReportController::class, 'store']);
+        Route::get('/reports/{id}', [CorridorReportController::class, 'show'])->whereNumber('id');
+        Route::post('/reports/{id}', [CorridorReportController::class, 'update'])->whereNumber('id'); // POST: mendukung multipart
+        Route::get('/waste/meta', [WasteController::class, 'meta']);
+        Route::get('/waste/summary', [WasteController::class, 'summary']);
+        Route::get('/waste/checkins', [WasteController::class, 'checkins']);
+        Route::get('/waste', [WasteController::class, 'index']);
+        Route::post('/waste', [WasteController::class, 'store']);
+        Route::get('/waste/{id}', [WasteController::class, 'show'])->whereNumber('id');
+        Route::put('/waste/{id}', [WasteController::class, 'update'])->whereNumber('id');
+        Route::delete('/waste/{id}', [WasteController::class, 'destroy'])->whereNumber('id');
+        Route::post('/waste/{id}/process', [WasteController::class, 'process'])->whereNumber('id');
 
         Route::get('/settings', [AdminSettingsController::class, 'show']);
         Route::put('/settings', [AdminSettingsController::class, 'update']);

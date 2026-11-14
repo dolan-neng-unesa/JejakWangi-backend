@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SensorReadingResource;
+use App\Models\KoridorModel;
 use App\Models\SensorReadingModel;
+use App\Services\OpenMeteoAir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -127,11 +129,23 @@ class SensorReadingController extends Controller
         $state = Cache::get(self::ACTIVE_CACHE_KEY);
         $reportedAt = $state ? Carbon::createFromTimestamp($state['at']) : null;
         $isStale = !$reportedAt || $reportedAt->lte(Carbon::now()->subMinutes(SensorReadingModel::FRESHNESS_WINDOW_MINUTES));
+        $koridorId = $isStale ? null : $state['koridor_id'];
+        $sumber = 'sensor';
+
+        // Open-Meteo: tanpa wilayah ESP32 yang aktif (atau mode "openmeteo"), kartu ISPU memakai koridor bawaan.
+        if (OpenMeteoAir::aktif() && ($koridorId === null || OpenMeteoAir::mode() === 'openmeteo')) {
+            if (($bawaan = OpenMeteoAir::koridorBawaan()) !== null) {
+                $koridorId = (string) $bawaan;
+                $isStale = false;
+                $sumber = OpenMeteoAir::SUMBER;
+            }
+        }
 
         return response()->json([
-            'koridor_id' => $isStale ? null : $state['koridor_id'],
+            'koridor_id' => $koridorId,
             'updated_at' => $reportedAt?->toIso8601String(),
             'is_stale' => $isStale,
+            'source' => $sumber,
         ]);
     }
 
@@ -195,7 +209,9 @@ class SensorReadingController extends Controller
             ->get()
             ->unique('sensor_type');
 
-        return $this->formatSnapshot($koridorId, $latest, $this->freshnessThreshold());
+        $koridor = ($koridorId !== null && ctype_digit($koridorId)) ? KoridorModel::find((int) $koridorId) : null;
+
+        return $this->formatSnapshot($koridorId, $latest, $this->freshnessThreshold(), $koridor);
     }
 
     private function buildAllSnapshots(): array
@@ -219,9 +235,15 @@ class SensorReadingController extends Controller
             ->unique(fn ($r) => $r->koridor_id . '|' . $r->sensor_type);
 
         $threshold = $this->freshnessThreshold();
+        $perKoridor = $latest->groupBy('koridor_id');
+        // Open-Meteo aktif: koridor yang belum punya bacaan sensor pun ikut (dari Open-Meteo).
+        $koridors = OpenMeteoAir::aktif() ? KoridorModel::orderBy('sort_order')->orderBy('id')->get()->keyBy(fn ($k) => (string) $k->id) : collect();
+
         $snapshots = [];
-        foreach ($latest->groupBy('koridor_id') as $koridorId => $rows) {
-            $snapshots[(string) $koridorId] = $this->formatSnapshot((string) $koridorId, $rows, $threshold);
+        $ids = $perKoridor->keys()->map(fn ($k) => (string) $k)->merge($koridors->keys())->unique();
+        foreach ($ids as $koridorId) {
+            $rows = $perKoridor->get($koridorId, collect());
+            $snapshots[$koridorId] = $this->formatSnapshot($koridorId, $rows, $threshold, $koridors->get($koridorId));
         }
 
         return ['snapshots' => (object) $snapshots];
@@ -232,23 +254,50 @@ class SensorReadingController extends Controller
         return Carbon::now()->subMinutes(SensorReadingModel::FRESHNESS_WINDOW_MINUTES);
     }
 
-    /** @param \Illuminate\Support\Collection<int, SensorReadingModel> $latest satu baris terbaru per sensor_type */
-    private function formatSnapshot(?string $koridorId, $latest, Carbon $threshold): array
+    /**
+     * @param \Illuminate\Support\Collection<int, SensorReadingModel> $latest satu baris terbaru per sensor_type
+     * @param KoridorModel|null $koridor dipakai untuk melengkapi dengan Open-Meteo bila aktif
+     */
+    private function formatSnapshot(?string $koridorId, $latest, Carbon $threshold, ?KoridorModel $koridor = null): array
     {
         $readings = [];
+        $segar = [];
         foreach ($latest as $row) {
+            $stale = $row->recorded_at->lte($threshold);
             $readings[$row->sensor_type] = [
                 ...(new SensorReadingResource($row))->resolve(),
-                'is_stale' => $row->recorded_at->lte($threshold),
+                'is_stale' => $stale,
             ];
+            if (! $stale) {
+                $segar[$row->sensor_type] = (float) $row->value;
+            }
         }
 
         $newest = $latest->max('recorded_at');
+        $stale = !$newest || $newest->lte($threshold);
+
+        if ($koridor && ($om = OpenMeteoAir::bacaan($koridor))) {
+            $isi = OpenMeteoAir::isi($segar, $om['values']);
+            foreach ($isi['dariOm'] as $tipe) {
+                $readings[$tipe] = [
+                    'sensor_type' => $tipe,
+                    'value' => $om['values'][$tipe],
+                    'unit' => SensorReadingModel::unitFor($tipe),
+                    'recorded_at' => $om['at']->toIso8601String(),
+                    'is_stale' => false,
+                    'source' => OpenMeteoAir::SUMBER,
+                ];
+            }
+            if ($isi['dariOm'] !== []) {
+                $newest = $newest && $newest->gt($om['at']) ? $newest : $om['at'];
+                $stale = false;
+            }
+        }
 
         return [
             'koridor_id' => $koridorId,
             'updated_at' => $newest?->toIso8601String(),
-            'is_stale' => !$newest || $newest->lte($threshold),
+            'is_stale' => $stale,
             'readings' => (object) $readings,
         ];
     }
