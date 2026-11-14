@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('desc')->nullable();
             $table->string('thumbnail')->nullable(); // path relatif, mis. "images/koridor/thumb-sritanjung.png"
             $table->string('hero_image')->nullable();
+            $table->string('hero_video')->nullable();
             $table->string('hijau_level'); // 'paling_hijau' | 'agak_hijau' | 'setengah_hijau' | 'tidak_hijau'
             $table->unsignedTinyInteger('hijau_score'); // 1..5
             $table->unsignedInteger('umkm_count')->default(0);
