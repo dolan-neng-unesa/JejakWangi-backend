@@ -4,12 +4,9 @@ use App\Http\Controllers\Api\AdminJejakWangiController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\ByoController;
 use App\Http\Controllers\Api\ChargerStationController;
-<<<<<<< HEAD
 use App\Http\Controllers\Api\CorridorReportController;
 use App\Http\Controllers\Api\WasteController;
 use App\Http\Controllers\Api\EcoCoachController;
-=======
->>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
 use App\Http\Controllers\Api\JejakWangiController;
 use App\Http\Controllers\Api\AdminSensorDeviceController;
 use App\Http\Controllers\Api\AdminSettingsController;
@@ -51,13 +48,10 @@ Route::get('/sensors/snapshots', [SensorReadingController::class, 'snapshots']);
 Route::get('/sensors/active', [SensorReadingController::class, 'active']); // wilayah yang sedang ON (home)
 Route::get('/sensors/history', [SensorReadingController::class, 'history']); // tren harian, Monitoring Lingkungan (admin)
 
-<<<<<<< HEAD
 // Eco-Coach (penjelas data berbasis AI). Login opsional: mode `tanya` boleh tamu, `ringkasan` wajib login
 // (dicek di controller lewat guard sanctum). Dibatasi per pengguna/IP untuk menekan biaya API.
 Route::post('/eco-coach', [EcoCoachController::class, 'jawab'])->middleware('throttle:eco-coach');
 
-=======
->>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
 // Autentikasi (Sanctum, token-based — cocok untuk PWA/mobile).
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
@@ -77,7 +71,6 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Zero-waste: kasir menerbitkan QR, pelanggan memindai.
     Route::post('/byo/token', [ByoController::class, 'issue'])->middleware('throttle:30,1');
     Route::post('/byo/confirm', [ByoController::class, 'confirm'])->middleware('throttle:20,1');
-<<<<<<< HEAD
     // Lapor Koridor (warga) & Sampah/Pangan (pengguna memindai QR lokasi, mengonfirmasi hasil timbang).
     Route::get('/reports/meta', [CorridorReportController::class, 'meta']);
     Route::post('/reports', [CorridorReportController::class, 'store'])->middleware('throttle:10,1');
@@ -87,8 +80,6 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/waste/mine', [WasteController::class, 'mine']);
     Route::post('/waste/{id}/confirm', [WasteController::class, 'confirm'])->whereNumber('id')->middleware('throttle:30,1');
     Route::post('/waste/{id}/correction', [WasteController::class, 'correction'])->whereNumber('id')->middleware('throttle:30,1');
-=======
->>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
     Route::post('/vouchers/{id}/redeem', [JejakWangiController::class, 'redeemVoucher'])->whereNumber('id');
 });
 
@@ -123,10 +114,7 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::put('/users/{id}', [AdminUserController::class, 'update']);
         Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
         Route::get('/jejak-wangi/summary', [AdminJejakWangiController::class, 'summary']);
-<<<<<<< HEAD
         Route::post('/eco-coach/laporan', [EcoCoachController::class, 'laporan'])->middleware('throttle:eco-coach');
-=======
->>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         Route::get('/activity-monthly', [AdminUserController::class, 'activityMonthly']);
         Route::get('/notifications', [AdminNotificationController::class, 'index']);
         Route::post('/notifications/mark-read', [AdminNotificationController::class, 'markAllRead']);
@@ -138,7 +126,6 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::post('/sensor-devices/{id}/rotate-key', [AdminSensorDeviceController::class, 'rotateKey']);
         Route::delete('/sensor-devices/{id}', [AdminSensorDeviceController::class, 'destroy']);
 
-<<<<<<< HEAD
         // Lapor Koridor & Sampah/Pangan (halaman admin).
         Route::get('/reports', [CorridorReportController::class, 'index']);
         Route::post('/reports', [CorridorReportController::class, 'store']);
@@ -154,8 +141,6 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::delete('/waste/{id}', [WasteController::class, 'destroy'])->whereNumber('id');
         Route::post('/waste/{id}/process', [WasteController::class, 'process'])->whereNumber('id');
 
-=======
->>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         Route::get('/settings', [AdminSettingsController::class, 'show']);
         Route::put('/settings', [AdminSettingsController::class, 'update']);
         Route::post('/backup', [AdminSettingsController::class, 'backup']);
