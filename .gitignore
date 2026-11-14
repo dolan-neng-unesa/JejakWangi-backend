@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 node_modules
 dist
 .env
 .env.local
 *.log
+=======
+*
+!.gitignore
+>>>>>>> 11277a5008152cfb3fea2a9f9fdf4ba8d2265cde
