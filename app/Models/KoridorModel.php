@@ -17,7 +17,11 @@ class KoridorModel extends Model
         'status', 'distance_meter', 'estimate_minutes', 'path', 'shade_score',
         'condition_title', 'condition_desc', 'sensor_snapshot',
         'oxygen_kg_day', 'co2_reduced_kg_day', 'carbon_inputs',
+<<<<<<< HEAD
         'sort_order', 'highlights', 'hero_video',
+=======
+        'sort_order', 'highlights',
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
     ];
 
     protected $casts = [

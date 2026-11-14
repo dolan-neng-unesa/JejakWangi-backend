@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SensorReadingResource;
+<<<<<<< HEAD
 use App\Models\KoridorModel;
 use App\Models\SensorReadingModel;
 use App\Services\OpenMeteoAir;
+=======
+use App\Models\SensorReadingModel;
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -129,6 +133,7 @@ class SensorReadingController extends Controller
         $state = Cache::get(self::ACTIVE_CACHE_KEY);
         $reportedAt = $state ? Carbon::createFromTimestamp($state['at']) : null;
         $isStale = !$reportedAt || $reportedAt->lte(Carbon::now()->subMinutes(SensorReadingModel::FRESHNESS_WINDOW_MINUTES));
+<<<<<<< HEAD
         $koridorId = $isStale ? null : $state['koridor_id'];
         $sumber = 'sensor';
 
@@ -146,6 +151,13 @@ class SensorReadingController extends Controller
             'updated_at' => $reportedAt?->toIso8601String(),
             'is_stale' => $isStale,
             'source' => $sumber,
+=======
+
+        return response()->json([
+            'koridor_id' => $isStale ? null : $state['koridor_id'],
+            'updated_at' => $reportedAt?->toIso8601String(),
+            'is_stale' => $isStale,
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         ]);
     }
 
@@ -209,9 +221,13 @@ class SensorReadingController extends Controller
             ->get()
             ->unique('sensor_type');
 
+<<<<<<< HEAD
         $koridor = ($koridorId !== null && ctype_digit($koridorId)) ? KoridorModel::find((int) $koridorId) : null;
 
         return $this->formatSnapshot($koridorId, $latest, $this->freshnessThreshold(), $koridor);
+=======
+        return $this->formatSnapshot($koridorId, $latest, $this->freshnessThreshold());
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
     }
 
     private function buildAllSnapshots(): array
@@ -235,6 +251,7 @@ class SensorReadingController extends Controller
             ->unique(fn ($r) => $r->koridor_id . '|' . $r->sensor_type);
 
         $threshold = $this->freshnessThreshold();
+<<<<<<< HEAD
         $perKoridor = $latest->groupBy('koridor_id');
         // Open-Meteo aktif: koridor yang belum punya bacaan sensor pun ikut (dari Open-Meteo).
         $koridors = OpenMeteoAir::aktif() ? KoridorModel::orderBy('sort_order')->orderBy('id')->get()->keyBy(fn ($k) => (string) $k->id) : collect();
@@ -244,6 +261,11 @@ class SensorReadingController extends Controller
         foreach ($ids as $koridorId) {
             $rows = $perKoridor->get($koridorId, collect());
             $snapshots[$koridorId] = $this->formatSnapshot($koridorId, $rows, $threshold, $koridors->get($koridorId));
+=======
+        $snapshots = [];
+        foreach ($latest->groupBy('koridor_id') as $koridorId => $rows) {
+            $snapshots[(string) $koridorId] = $this->formatSnapshot((string) $koridorId, $rows, $threshold);
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         }
 
         return ['snapshots' => (object) $snapshots];
@@ -254,6 +276,7 @@ class SensorReadingController extends Controller
         return Carbon::now()->subMinutes(SensorReadingModel::FRESHNESS_WINDOW_MINUTES);
     }
 
+<<<<<<< HEAD
     /**
      * @param \Illuminate\Support\Collection<int, SensorReadingModel> $latest satu baris terbaru per sensor_type
      * @param KoridorModel|null $koridor dipakai untuk melengkapi dengan Open-Meteo bila aktif
@@ -293,11 +316,29 @@ class SensorReadingController extends Controller
                 $stale = false;
             }
         }
+=======
+    /** @param \Illuminate\Support\Collection<int, SensorReadingModel> $latest satu baris terbaru per sensor_type */
+    private function formatSnapshot(?string $koridorId, $latest, Carbon $threshold): array
+    {
+        $readings = [];
+        foreach ($latest as $row) {
+            $readings[$row->sensor_type] = [
+                ...(new SensorReadingResource($row))->resolve(),
+                'is_stale' => $row->recorded_at->lte($threshold),
+            ];
+        }
+
+        $newest = $latest->max('recorded_at');
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
 
         return [
             'koridor_id' => $koridorId,
             'updated_at' => $newest?->toIso8601String(),
+<<<<<<< HEAD
             'is_stale' => $stale,
+=======
+            'is_stale' => !$newest || $newest->lte($threshold),
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
             'readings' => (object) $readings,
         ];
     }

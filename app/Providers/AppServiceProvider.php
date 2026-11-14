@@ -10,12 +10,15 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+<<<<<<< HEAD
     public function register(): void
     {
         // Dibuat eksplisit (bukan auto-wiring) karena konstruktornya menerima array konfigurasi & Closure opsional.
         $this->app->bind(\App\Services\EcoCoach\EcoCoach::class, fn () => new \App\Services\EcoCoach\EcoCoach(config('ecocoach')));
     }
 
+=======
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
     public function boot(): void
     {
         // Semua parameter {id} di routes/api.php wajib numerik. Tanpa ini,
@@ -44,10 +47,13 @@ class AppServiceProvider extends ServiceProvider
 
         // Mood tamu tanpa auth. Banyak pengunjung bisa berbagi satu IP (WiFi acara/NAT seluler),
         // jadi batasnya sengaja longgar — cukup untuk menahan skrip spam, bukan pemakaian wajar.
+<<<<<<< HEAD
         // Eco-Coach memanggil LLM berbayar di tiap request: 10/menit per pengguna (atau per IP untuk tamu).
         RateLimiter::for('eco-coach', fn (Request $request) => Limit::perMinute(10)
             ->by($request->user('sanctum')?->id ?? $request->ip()));
 
+=======
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         RateLimiter::for('mood-store', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
     }
 }

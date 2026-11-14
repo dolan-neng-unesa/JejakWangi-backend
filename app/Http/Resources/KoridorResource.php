@@ -48,8 +48,11 @@ class KoridorResource extends JsonResource
             // meng-overlay data live/DB dari /api/sensors/* di atas nilai ini
             // (lihat useSensorReading.js), jadi field ini cukup jadi fallback.
             'sensor' => $this->sensor_snapshot,
+<<<<<<< HEAD
 
             'hero_video' => $this->hero_video ? asset($this->hero_video) : null,
+=======
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         ];
     }
 }

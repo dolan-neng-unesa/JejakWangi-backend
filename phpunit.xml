@@ -23,8 +23,11 @@
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="DB_URL" value=""/>
+<<<<<<< HEAD
         <env name="LLM_PROVIDER" value=""/>
         <env name="OPENMETEO_MODE" value="off"/>
+=======
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

@@ -57,3 +57,15 @@ Backend memakai SQLite. File yang dipakai ditentukan `DB_DATABASE` di `.env`; ni
 dihitung dari **root proyek** (bukan folder `database/`). Contoh: `DB_DATABASE=laravel` berarti
 file `laravel` di root — bukan `database/database.sqlite`. Production: isi path **absolut**
 dan pastikan file serta foldernya bisa ditulis oleh user web server.
+<<<<<<< HEAD
+=======
+
+
+
+## Figma Link 
+https://www.figma.com/design/MNV5DGRhN07Mosy57J71ot/jejak-wangi?node-id=16-715&t=etKgyPRCwnAplZk3-1
+
+
+## Flowchart Jejak wangi Figma Link
+https://www.figma.com/board/8zv6Mj1PGNH1sV0DiL1XwK/jejak-wangi-Flowchart?node-id=0-1&t=PABP7Q5QMjR69Lww-1
+>>>>>>> 0e65e5b26d27c7d03831a1380f3391c670d64ff1
