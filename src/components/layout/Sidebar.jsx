@@ -1,5 +1,9 @@
 import { NavLink } from "react-router-dom";
+<<<<<<< HEAD
 import { Activity, BarChart3, Bell, CalendarDays, Cpu, BookOpen, Flag, Footprints, Leaf, Recycle, LayoutDashboard, LogOut, MapPin, Navigation, Settings, Smile, Users, X } from "lucide-react";
+=======
+import { Activity, BarChart3, Bell, CalendarDays, Cpu, Footprints, Leaf, LayoutDashboard, LogOut, MapPin, Navigation, Settings, Smile, Users, X } from "lucide-react";
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
 import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
 import { useNotifBadge } from "../../context/NotifContext";
@@ -11,15 +15,21 @@ export const NAV = [
   { to: "/kalender-festival", label: "Kalender Festival BWI", icon: CalendarDays },
   { to: "/sensor-iot", label: "Sensor IoT", icon: Cpu },
   { to: "/mood-wellbeing", label: "Mood & Wellbeing", icon: Smile },
+<<<<<<< HEAD
   { to: "/sampah-pangan", label: "Sampah & Pangan", icon: Recycle },
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
   { to: "/jejak-wangi", label: "Jejak Wangi", icon: Footprints },
   { to: "/geofencing", label: "Geofencing", icon: MapPin },
   { to: "/laporan", label: "Laporan & Analitik", icon: BarChart3 },
   { to: "/pengguna", label: "Pengguna", icon: Users },
   { to: "/notifikasi", label: "Notifikasi", icon: Bell, badge: true },
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
+<<<<<<< HEAD
   { to: "/lapor-koridor", label: "Lapor Koridor", icon: Flag },
   { to: "/cara-menghitung", label: "Cara Kami Menghitung", icon: BookOpen },
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
 ];
 
 export function Logo() {

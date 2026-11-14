@@ -18,10 +18,13 @@ const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+<<<<<<< HEAD
 const LaporKoridorPage = lazy(() => import("./pages/LaporKoridorPage"));
 const SampahPanganPage = lazy(() => import("./pages/SampahPanganPage"));
 const MonitoringKoridorPage = lazy(() => import("./pages/MonitoringKoridorPage"));
 const CaraMenghitungPage = lazy(() => import("./pages/CaraMenghitungPage"));
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
 
 const Loading = () => (
   <div className="h-full min-h-[40vh] flex items-center justify-center text-muted text-sm" role="status">Memuat halaman…</div>
@@ -37,10 +40,13 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="monitoring" element={<MonitoringPage />} />
+<<<<<<< HEAD
         <Route path="monitoring/koridor/:id?" element={<MonitoringKoridorPage />} />
         <Route path="sampah-pangan/*" element={<SampahPanganPage />} />
         <Route path="lapor-koridor/*" element={<LaporKoridorPage />} />
         <Route path="cara-menghitung" element={<CaraMenghitungPage />} />
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
         <Route path="smart-green-route" element={<SmartGreenRoutePage />} />
         <Route path="kalender-festival" element={<FestivalPage />} />
         <Route path="sensor-iot" element={<SensorIotPage />} />

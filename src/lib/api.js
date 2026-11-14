@@ -44,8 +44,12 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 
 async function send(method, path, { query, body, auth = true, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const headers = { Accept: "application/json" };
+<<<<<<< HEAD
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json"; // FormData: browser mengisi boundary sendiri
+=======
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
   const token = getToken();
   if (auth && token) headers.Authorization = `Bearer ${token}`;
 
@@ -65,7 +69,11 @@ async function send(method, path, { query, body, auth = true, signal, timeoutMs 
     res = await fetch(buildUrl(path, query), {
       method,
       headers,
+<<<<<<< HEAD
       body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
+=======
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
       signal: controller.signal,
     });
   } catch (err) {

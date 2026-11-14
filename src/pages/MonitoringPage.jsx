@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
+<<<<<<< HEAD
 import { Link } from "react-router-dom";
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
 import { Droplet, Info, Sun, Thermometer, Volume2, Wind } from "lucide-react";
 import { PageHeader } from "../components/ui/PageHeader";
 import { StatCard } from "../components/ui/StatCard";
@@ -304,7 +307,11 @@ function DetailModal({ c, onClose, days }) {
   const daily = hist.data ?? [];
   return (
     <Modal open onClose={onClose} size="lg" title={koridorLabel(k)} subtitle={`${k.formal_name} — ${k.route_label || ""}`}
+<<<<<<< HEAD
       footer={<><Link to={`/monitoring/koridor/${k.id}`}><Button variant="soft">Buka halaman koridor →</Button></Link><Button variant="secondary" onClick={onClose}>Tutup</Button></>}>
+=======
+      footer={<Button variant="secondary" onClick={onClose}>Tutup</Button>}>
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
       <div className="grid gap-3 grid-cols-2 md:grid-cols-5 mb-5">
         <Mini label="AQI" value={c.aqi ?? "—"} badge={<Badge tone={c.aqiInfo.tone}>{c.aqiInfo.label}</Badge>} />
         <Mini label="Suhu" value={c.suhu == null ? "—" : `${fmtNum(c.suhu, 1)}°C`} badge={<Badge tone={c.suhuInfo.tone}>{c.suhuInfo.label}</Badge>} />

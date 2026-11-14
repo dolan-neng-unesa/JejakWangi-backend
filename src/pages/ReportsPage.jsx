@@ -7,7 +7,10 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { FilterSelect } from "../components/ui/Field";
 import { ErrorState, Skeleton } from "../components/ui/States";
+<<<<<<< HEAD
 import AsistenLaporan from "../components/AsistenLaporan";
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
 import { BarChart, Legend, LineChart } from "../components/charts/Charts";
 import { useAsync } from "../hooks/useAsync";
 import { cityAggregate, koridorLabel, useEnvironment } from "../hooks/useEnvironment";
@@ -48,8 +51,11 @@ export default function ReportsPage() {
         <Button variant="secondary" icon={Printer} onClick={() => window.print()}>Cetak / PDF</Button>
       </PageHeader>
 
+<<<<<<< HEAD
       <AsistenLaporan />
 
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
       {data.error && !d ? <Card><ErrorState error={data.error} onRetry={data.reload} /></Card> : (
         <>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 mb-4">

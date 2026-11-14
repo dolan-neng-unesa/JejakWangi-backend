@@ -62,12 +62,15 @@ export const mood = {
   summary: (params) => api.get("/mood-logs/summary", params),
 };
 
+<<<<<<< HEAD
 // Eco-Coach: Asisten Laporan mingguan. Angka dihitung server dari database; AI hanya menjelaskan,
 // dan bila AI tidak tersedia server memberi ringkasan template. → { data: { teks, sumber: "ai"|"template" } }
 export const ecoCoach = {
   laporan: async () => unwrap(await api.post("/admin/eco-coach/laporan", undefined, { timeoutMs: 30_000 })),
 };
 
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
 // --- Endpoint tambahan khusus admin (lihat folder backend-patch/) ---
 export const devices = {
   list: () => api.get("/admin/sensor-devices"), // → { data, summary }
@@ -106,6 +109,7 @@ export async function loadKoridorSnapshots(koridors) {
   );
   return Object.fromEntries(results);
 }
+<<<<<<< HEAD
 
 // Lapor Koridor (laporan warga → tindak lanjut DLH). Lampiran dikirim multipart (FormData).
 export const reports = {
@@ -128,3 +132,5 @@ export const waste = {
   remove: (id) => api.del(`/admin/waste/${id}`),
   process: (id, undo = false) => api.post(`/admin/waste/${id}/process`, { undo }),
 };
+=======
+>>>>>>> 1ccb9e09cce22ea6fabbe45184c619d6f9f4d433
