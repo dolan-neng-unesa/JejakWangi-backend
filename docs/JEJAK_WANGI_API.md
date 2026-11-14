@@ -46,3 +46,10 @@ Seri jarak berbagi peringkat.
 
 Menjalankan: `php artisan migrate --seed`. Seeder membuat kasir demo `kasir@jejakwangi.id` / `jejakwangi123` (hanya non-produksi).
 Di produksi: admin mengisi **ID UMKM** pada akun pengguna (dashboard admin → Pengguna).
+
+## Lapor Koridor & Sampah/Pangan (baru)
+Setelah menempel: `php artisan migrate && php artisan db:seed --class=ReportsWasteSeeder && php artisan storage:link`
+(storage:link wajib agar lampiran laporan bisa dibuka).
+- Admin: `GET/POST /admin/reports`, `GET/POST /admin/reports/{id}` (POST = ubah status, multipart), `GET /admin/waste{,/meta,/summary,/checkins}`, `POST/PUT/DELETE /admin/waste`, `POST /admin/waste/{id}/process`
+- Pengguna: `GET /reports/meta`, `POST /reports`, `GET /me/reports`, `POST /reports/{id}/respond`, `POST /waste/checkin`, `GET /waste/mine`, `POST /waste/{id}/confirm|correction`
+- QR lokasi timbang: `jejakwangi:timbang:BSS-001` (daftar stasiun & tarif poin di `config/jejakwangi.php` → `sampah`).

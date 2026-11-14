@@ -40,7 +40,7 @@ class MonitorSystem extends Command
         $minutes = max(1, (int) AppSettingModel::get('sensor.offline_minutes', 5));
         $created = 0;
 
-        $devices = SensorDeviceModel::where('is_active', true)->where('is_maintenance', false)->whereNotNull('last_seen_at')->get();
+        $devices = SensorDeviceModel::where('is_active', true)->where('is_maintenance', false)->whereNotIn('device_code', [\App\Services\Engine\OpenMeteo::DEVICE, \App\Services\Engine\OpenMeteo::DEVICE_SEED])->whereNotNull('last_seen_at')->get();
         foreach ($devices as $d) {
             if ($d->last_seen_at->gt(now()->subMinutes($minutes))) {
                 continue;

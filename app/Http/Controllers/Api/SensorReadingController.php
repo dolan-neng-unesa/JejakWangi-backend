@@ -241,15 +241,9 @@ class SensorReadingController extends Controller
 
         $snapshots = [];
         $ids = $perKoridor->keys()->map(fn ($k) => (string) $k)->merge($koridors->keys())->unique();
-
         foreach ($ids as $koridorId) {
             $rows = $perKoridor->get($koridorId, collect());
-            $snapshots[$koridorId] = $this->formatSnapshot(
-                $koridorId,
-                $rows,
-                $threshold,
-                $koridors->get($koridorId)
-            );
+            $snapshots[$koridorId] = $this->formatSnapshot($koridorId, $rows, $threshold, $koridors->get($koridorId));
         }
 
         return ['snapshots' => (object) $snapshots];
@@ -268,27 +262,22 @@ class SensorReadingController extends Controller
     {
         $readings = [];
         $segar = [];
-
         foreach ($latest as $row) {
             $stale = $row->recorded_at->lte($threshold);
-
             $readings[$row->sensor_type] = [
                 ...(new SensorReadingResource($row))->resolve(),
                 'is_stale' => $stale,
             ];
-
             if (! $stale) {
                 $segar[$row->sensor_type] = (float) $row->value;
             }
         }
 
         $newest = $latest->max('recorded_at');
-        $stale = ! $newest || $newest->lte($threshold);
-        $source = 'sensor';
+        $stale = !$newest || $newest->lte($threshold);
 
         if ($koridor && ($om = OpenMeteoAir::bacaan($koridor))) {
             $isi = OpenMeteoAir::isi($segar, $om['values']);
-
             foreach ($isi['dariOm'] as $tipe) {
                 $readings[$tipe] = [
                     'sensor_type' => $tipe,
@@ -299,11 +288,9 @@ class SensorReadingController extends Controller
                     'source' => OpenMeteoAir::SUMBER,
                 ];
             }
-
             if ($isi['dariOm'] !== []) {
                 $newest = $newest && $newest->gt($om['at']) ? $newest : $om['at'];
                 $stale = false;
-                $source = OpenMeteoAir::SUMBER;
             }
         }
 
@@ -312,7 +299,6 @@ class SensorReadingController extends Controller
             'updated_at' => $newest?->toIso8601String(),
             'is_stale' => $stale,
             'readings' => (object) $readings,
-            'source' => $source,
         ];
     }
 

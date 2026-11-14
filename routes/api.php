@@ -4,6 +4,9 @@ use App\Http\Controllers\Api\AdminJejakWangiController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\ByoController;
 use App\Http\Controllers\Api\ChargerStationController;
+use App\Http\Controllers\Api\CheckinController;
+use App\Http\Controllers\Api\EngineController;
+use App\Http\Controllers\Api\ImpactController;
 use App\Http\Controllers\Api\CorridorReportController;
 use App\Http\Controllers\Api\WasteController;
 use App\Http\Controllers\Api\EcoCoachController;
@@ -80,8 +83,18 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/waste/mine', [WasteController::class, 'mine']);
     Route::post('/waste/{id}/confirm', [WasteController::class, 'confirm'])->whereNumber('id')->middleware('throttle:30,1');
     Route::post('/waste/{id}/correction', [WasteController::class, 'correction'])->whereNumber('id')->middleware('throttle:30,1');
+    // Alur QR flowchart: check-in lapak → bawa tas? → QR tujuan kedua → kecepatan wajar?; kartu dampak; tukar poin.
+    Route::post('/checkins/start', [CheckinController::class, 'start'])->middleware('throttle:30,1');
+    Route::post('/checkins/{id}/finish', [CheckinController::class, 'finish'])->whereNumber('id')->middleware('throttle:30,1');
+    Route::get('/me/checkins', [CheckinController::class, 'mine']);
+    Route::get('/me/impact', [ImpactController::class, 'impact']);
+    Route::get('/rewards', [ImpactController::class, 'rewards']);
+    Route::post('/rewards/redeem', [ImpactController::class, 'redeem'])->middleware('throttle:10,1');
     Route::post('/vouchers/{id}/redeem', [JejakWangiController::class, 'redeemVoucher'])->whereNumber('id');
 });
+
+// Scan QR kantong parkir (boleh tamu): ISPU, suhu, jam ramai, sehat?, saran waktu/rute lain.
+Route::get('/qr/parkir/{kode}', [CheckinController::class, 'parkir'])->where('kode', '.*')->middleware('throttle:60,1');
 
 // Publik: leaderboard (nama disamarkan; token opsional untuk menandai baris milik sendiri) & charger station surya.
 Route::get('/leaderboard', [JejakWangiController::class, 'leaderboard']);
@@ -140,6 +153,30 @@ Route::middleware(['auth:sanctum', 'active', 'admin'])->group(function () {
         Route::put('/waste/{id}', [WasteController::class, 'update'])->whereNumber('id');
         Route::delete('/waste/{id}', [WasteController::class, 'destroy'])->whereNumber('id');
         Route::post('/waste/{id}/process', [WasteController::class, 'process'])->whereNumber('id');
+
+        // Server Lokal & Tindak Lanjut (flowchart).
+        Route::prefix('engine')->group(function () {
+            Route::get('/sumber', [EngineController::class, 'sumber']);
+            Route::get('/hourly', [EngineController::class, 'hourly']);
+            Route::post('/recompute', [EngineController::class, 'recompute']);
+            Route::get('/neraca', [EngineController::class, 'neraca']);
+            Route::get('/rapor', [EngineController::class, 'rapor']);
+            Route::get('/ekonomi', [EngineController::class, 'ekonomi']);
+            Route::get('/baseline', [EngineController::class, 'baselineIndex']);
+            Route::post('/baseline', [EngineController::class, 'baselineStore']);
+            Route::post('/simulasi', [EngineController::class, 'simulasi']);
+            Route::get('/skenario', [EngineController::class, 'skenario']);
+        });
+        Route::post('/asisten/laporan', [EngineController::class, 'laporanBaru'])->middleware('throttle:eco-coach');
+        Route::get('/proposals', [EngineController::class, 'proposals']);
+        Route::post('/proposals/{id}/setuju', [EngineController::class, 'setuju'])->whereNumber('id');
+        Route::post('/proposals/{id}/tolak', [EngineController::class, 'tolak'])->whereNumber('id');
+        Route::post('/proposals/{id}/revisi', [EngineController::class, 'revisi'])->whereNumber('id');
+        Route::get('/follow-ups', [EngineController::class, 'followUps']);
+        Route::post('/follow-ups', [EngineController::class, 'followUpStore']);
+        Route::put('/follow-ups/{id}', [EngineController::class, 'followUpUpdate'])->whereNumber('id');
+        Route::get('/qr-points', [EngineController::class, 'qrPoints']);
+        Route::post('/qr-points', [EngineController::class, 'qrPointStore']);
 
         Route::get('/settings', [AdminSettingsController::class, 'show']);
         Route::put('/settings', [AdminSettingsController::class, 'update']);

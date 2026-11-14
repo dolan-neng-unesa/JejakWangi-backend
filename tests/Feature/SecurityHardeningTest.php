@@ -126,7 +126,7 @@ class SecurityHardeningTest extends TestCase
 
     public function test_email_didaftarkan_dalam_huruf_kecil_dan_duplikat_beda_kapital_ditolak(): void
     {
-        $this->postJson('/api/auth/register', ['name' => 'A', 'email' => 'Campur@Jejak Wangi.Test', 'password' => 'rahasia123'])
+        $this->postJson('/api/auth/register', ['name' => 'A', 'email' => 'Campur@JejakWangi.Test', 'password' => 'rahasia123'])
             ->assertStatus(201)->assertJsonPath('user.email', 'campur@jejakwangi.test');
 
         $this->postJson('/api/auth/register', ['name' => 'B', 'email' => 'CAMPUR@jejakwangi.test', 'password' => 'rahasia123'])

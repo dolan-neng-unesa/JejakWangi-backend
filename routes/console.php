@@ -12,3 +12,6 @@ Schedule::command('jejakwangi:monitor')->everyFiveMinutes();
 // Buang token Sanctum yang sudah kedaluwarsa lebih dari 24 jam supaya
 // personal_access_tokens tidak membengkak (token bermasa-berlaku sejak SANCTUM_EXPIRATION).
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
+
+// Database per jam (neraca karbon koridor): tarik Open-Meteo lalu hitung jam yang baru lewat.
+Schedule::command('engine:hourly')->hourlyAt(5);

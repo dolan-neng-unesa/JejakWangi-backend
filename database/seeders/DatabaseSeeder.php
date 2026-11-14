@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             ChargerStationSeeder::class,
             KasirDemoSeeder::class,
             ReportsWasteSeeder::class,
+            DemoCycleSeeder::class,
         ]);
     }
 }
