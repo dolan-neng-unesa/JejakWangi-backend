@@ -1,2 +1,60 @@
-*
-!.gitignore
+# ===== JEJAK WANGI — backend (Laravel) =====
+
+# Dependensi
+/vendor
+/node_modules
+
+# Rahasia & konfigurasi lokal — JANGAN di-commit (berisi APP_KEY, kunci API LLM, kredensial DB/OAuth)
+.env
+.env.*
+!.env.example
+auth.json
+
+# Database lokal (SQLite) & file SQLite liar di root project
+/database/*.sqlite
+/database/*.sqlite-journal
+/database/*.sqlite-wal
+/database/*.sqlite-shm
+/laravel
+
+# Runtime Laravel
+/bootstrap/cache/*.php
+/storage/*.key
+/storage/pail
+/storage/logs/*.log
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*.php
+/storage/framework/testing/*
+# Unggahan pengguna (lampiran Lapor Koridor, foto) & cadangan database (Pengaturan → Backup)
+/storage/app/public/*
+/storage/app/private/*
+!/storage/app/public/.gitignore
+!/storage/app/private/.gitignore
+
+# Build / link publik
+/public/hot
+/public/storage
+/public/build
+
+# Test & tool
+.phpunit.result.cache
+.phpunit.cache
+/coverage
+.php-cs-fixer.cache
+.phpactor.json
+Homestead.json
+Homestead.yaml
+
+# Editor & OS
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Log npm/yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

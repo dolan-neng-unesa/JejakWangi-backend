@@ -85,7 +85,9 @@ return [
             'trembesi' => 28488, 'kenanga' => 756.59, 'beringin' => 535.9, 'mahoni' => 295.73, 'bungur' => 160.14,
             'flamboyan' => 42.2, 'tanjung' => 34.29, 'angsana' => 11.12, 'asumsi_rata2' => 100,
         ],
-        'liter_per_100km' => ['motor' => 2.66, 'mobil' => 11.79],
+        // Sama dengan carbonBalance.js (JENIS_KENDARAAN): liter/100 km dan jenis BBM tiap kelas kendaraan.
+        'liter_per_100km' => ['motor' => 2.66, 'mobil' => 11.79, 'bus' => 16.89, 'truk' => 15.15],
+        'bbm_kendaraan' => ['motor' => 'bensin', 'mobil' => 'bensin', 'bus' => 'solar', 'truk' => 'solar'],
         // Plastik (ASUMSI — ganti saat ada kajian lokal)
         'solar_bench_kwh_hari' => 0.45,              // panel 100 W × ±4,5 jam sinar efektif (ASUMSI, ganti dengan data Solar Bench)
         'plastik' => ['kg_co2_per_kantong' => 0.04, 'kantong_per_transaksi' => 1, 'poin_per_transaksi' => 5, 'harga_per_kantong' => 300],
